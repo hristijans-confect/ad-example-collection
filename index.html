@@ -43,7 +43,7 @@
       .preview-workspace {
         width: min(980px, 100%);
         display: flex;
-        align-items: flex-start;
+        align-items: stretch;
         justify-content: center;
         gap: 18px;
       }
@@ -55,9 +55,18 @@
         flex: none;
         position: sticky;
         top: 18px;
+        z-index: 1100;
+        align-self: stretch;
+        display: flex;
+        flex-direction: column;
       }
+      .sidebar-top-controls,
+      .sidebar-bottom-controls,
       .control-sidebar .export-menu-wrap {
         width: 100%;
+      }
+      .sidebar-bottom-controls {
+        margin-top: auto;
       }
       .control-sidebar .export-frames {
         width: 100%;
@@ -1078,7 +1087,7 @@
         padding: 0;
         font-size: 14px;
         line-height: 18px;
-        font-weight: 500;
+        font-weight: 400;
       }
       .fbm-see-more,
       .igm-see-more {
@@ -1119,10 +1128,11 @@
       }
       .export-frame-menu {
         position: absolute;
-        top: 44px;
         right: 0;
-        z-index: 100;
-        width: 296px;
+        bottom: 48px;
+        z-index: 1200;
+        width: 230px;
+        max-width: 100%;
         padding: 14px;
         border: 1px solid #d8dce1;
         border-radius: 14px;
@@ -1130,7 +1140,7 @@
         box-shadow:
           0 12px 32px rgba(0, 0, 0, 0.16),
           0 2px 8px rgba(0, 0, 0, 0.08);
-        transform-origin: top right;
+        transform-origin: bottom right;
         animation: exportMenuIn 0.16s ease-out;
       }
       .export-frame-menu[hidden] {
@@ -1139,7 +1149,7 @@
       @keyframes exportMenuIn {
         from {
           opacity: 0;
-          transform: translateY(-5px) scale(0.98);
+          transform: translateY(5px) scale(0.98);
         }
         to {
           opacity: 1;
@@ -1149,12 +1159,12 @@
       .export-frame-menu::before {
         content: '';
         position: absolute;
-        top: -6px;
+        bottom: -6px;
         right: 22px;
         width: 10px;
         height: 10px;
-        border-top: 1px solid #d8dce1;
-        border-left: 1px solid #d8dce1;
+        border-right: 1px solid #d8dce1;
+        border-bottom: 1px solid #d8dce1;
         background: #fff;
         transform: rotate(45deg);
       }
@@ -1280,10 +1290,13 @@
       @media (max-width: 520px) {
         .export-frame-menu {
           position: fixed;
-          top: 72px;
+          top: auto;
           right: 12px;
+          bottom: 86px;
           left: 12px;
           width: auto;
+          max-height: calc(100vh - 110px);
+          overflow-y: auto;
         }
         .export-frame-menu::before {
           display: none;
@@ -1325,6 +1338,53 @@
         align-items: center;
         justify-content: space-between;
         gap: 16px;
+      }
+      .export-progress-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .export-cancel-button {
+        min-width: 82px;
+        height: 34px;
+        padding: 0 14px;
+        border: 1px solid #dc252f;
+        border-radius: 8px;
+        background: #f02f39;
+        color: #fff;
+        font: inherit;
+        font-size: 13px;
+        line-height: 32px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 1px 3px rgba(122, 16, 23, 0.24);
+        transition:
+          background-color 0.15s ease,
+          border-color 0.15s ease,
+          box-shadow 0.15s ease,
+          transform 0.08s ease;
+      }
+      .export-cancel-button:hover {
+        background: #df2630;
+        border-color: #ca2029;
+        box-shadow: 0 3px 8px rgba(122, 16, 23, 0.3);
+      }
+      .export-cancel-button:active {
+        background: #c91f28;
+        border-color: #b71b23;
+        box-shadow: 0 1px 2px rgba(122, 16, 23, 0.22);
+        transform: translateY(1px) scale(0.98);
+      }
+      .export-cancel-button:focus-visible {
+        outline: 3px solid rgba(240, 47, 57, 0.28);
+        outline-offset: 2px;
+      }
+      .export-cancel-button[hidden] {
+        display: none !important;
+      }
+      .export-cancel-button:disabled {
+        opacity: 0.6;
+        cursor: wait;
       }
       .export-progress-title {
         font-size: 14px;
@@ -1553,6 +1613,11 @@
         .control-sidebar {
           width: min(682px, 100%);
           position: static;
+          align-self: auto;
+          gap: 12px;
+        }
+        .sidebar-bottom-controls {
+          margin-top: 0;
         }
       }
       @media (max-width: 760px) {
@@ -1809,6 +1874,371 @@
         object-fit: contain;
         flex: none;
         transform: translateY(0.25px);
+      }
+
+      .data-source-button {
+        width: 100%;
+        height: 42px;
+        padding: 0 16px;
+        border: 0;
+        border-radius: 7px;
+        background: #e2e5e9;
+        color: #080809;
+        font-size: 14px;
+        line-height: 42px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .data-source-button:hover {
+        background: #d8dce1;
+      }
+      .data-source-button:focus-visible {
+        outline: 2px solid #0866ff;
+        outline-offset: 2px;
+      }
+      .data-source-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
+      .data-source-modal[hidden] {
+        display: none !important;
+      }
+      .data-source-modal-backdrop {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        border: 0;
+        background: rgba(20, 22, 26, 0.42);
+        backdrop-filter: blur(7px);
+        -webkit-backdrop-filter: blur(7px);
+        cursor: default;
+      }
+      .data-source-modal-dialog {
+        position: relative;
+        z-index: 2;
+        width: min(520px, calc(100vw - 32px));
+        min-height: 250px;
+        max-height: calc(100vh - 48px);
+        overflow: auto;
+        border: 1px solid #d8dce1;
+        border-radius: 16px;
+        background: #fff;
+        box-shadow:
+          0 24px 64px rgba(0, 0, 0, 0.24),
+          0 4px 16px rgba(0, 0, 0, 0.12);
+        animation: dataSourceModalIn 0.18s ease-out;
+      }
+      .data-source-modal-header {
+        min-height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 16px 18px;
+        border-bottom: 1px solid #e2e5e9;
+      }
+      .data-source-modal-title {
+        margin: 0;
+        font-size: 18px;
+        line-height: 24px;
+        font-weight: 700;
+        color: #080809;
+      }
+      .data-source-modal-close {
+        width: 36px;
+        height: 36px;
+        flex: none;
+        display: grid;
+        place-items: center;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: #e2e5e9;
+        color: #65686c;
+        cursor: pointer;
+      }
+      .data-source-modal-close:hover {
+        background: #d8dce1;
+      }
+      .data-source-modal-close svg {
+        width: 18px;
+        height: 18px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+      }
+      .data-source-modal-body {
+        min-height: 300px;
+        padding: 20px;
+      }
+      .data-source-page[hidden] {
+        display: none !important;
+      }
+      .data-source-intro {
+        margin: 0 0 16px;
+        color: #65686c;
+        font-size: 13px;
+        line-height: 18px;
+      }
+      .data-source-options {
+        display: grid;
+        gap: 10px;
+      }
+      .data-source-option {
+        display: flex;
+        align-items: flex-start;
+        gap: 11px;
+        padding: 13px;
+        border: 1px solid #d8dce1;
+        border-radius: 10px;
+        background: #fff;
+        cursor: pointer;
+        transition:
+          border-color 0.15s ease,
+          background-color 0.15s ease,
+          box-shadow 0.15s ease;
+      }
+      .data-source-option:hover {
+        border-color: #b8c6db;
+        background: #f8f9fb;
+      }
+      .data-source-option:has(input:checked) {
+        border-color: #0866ff;
+        background: #f2f7ff;
+        box-shadow: 0 0 0 1px rgba(8, 102, 255, 0.12);
+      }
+      .data-source-option input {
+        width: 18px;
+        height: 18px;
+        margin: 1px 0 0;
+        accent-color: #0866ff;
+        flex: none;
+      }
+      .data-source-option-copy {
+        min-width: 0;
+      }
+      .data-source-option-title {
+        display: block;
+        color: #080809;
+        font-size: 14px;
+        line-height: 18px;
+        font-weight: 700;
+      }
+      .data-source-option-description {
+        display: block;
+        margin-top: 2px;
+        color: #65686c;
+        font-size: 12px;
+        line-height: 16px;
+      }
+      .custom-csv-field {
+        margin-top: 12px;
+      }
+      .custom-csv-field[hidden] {
+        display: none !important;
+      }
+      .custom-csv-label {
+        display: block;
+        margin-bottom: 6px;
+        color: #080809;
+        font-size: 13px;
+        line-height: 17px;
+        font-weight: 600;
+      }
+      .custom-csv-input {
+        width: 100%;
+        height: 42px;
+        padding: 0 12px;
+        border: 1px solid #ccd0d5;
+        border-radius: 8px;
+        background: #fff;
+        color: #080809;
+        font: inherit;
+        font-size: 13px;
+        outline: none;
+      }
+      .custom-csv-input:focus {
+        border-color: #0866ff;
+        box-shadow: 0 0 0 3px rgba(8, 102, 255, 0.14);
+      }
+      .custom-csv-hint,
+      .data-source-inline-status {
+        margin: 6px 0 0;
+        color: #65686c;
+        font-size: 12px;
+        line-height: 16px;
+      }
+      .data-source-inline-status.is-error {
+        color: #c91f28;
+      }
+      .data-source-inline-status.is-success {
+        color: #24832c;
+      }
+      .data-source-modal-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 20px;
+        border-top: 1px solid #e2e5e9;
+      }
+      .data-source-footer-left,
+      .data-source-footer-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .data-source-secondary-button,
+      .data-source-help-button,
+      .data-source-primary-button {
+        height: 38px;
+        border-radius: 8px;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition:
+          background-color 0.15s ease,
+          border-color 0.15s ease,
+          transform 0.08s ease;
+      }
+      .data-source-secondary-button {
+        padding: 0 13px;
+        border: 1px solid #ccd0d5;
+        background: #fff;
+        color: #080809;
+      }
+      .data-source-secondary-button:hover,
+      .data-source-help-button:hover {
+        background: #f0f2f5;
+      }
+      .data-source-help-button {
+        width: 38px;
+        padding: 0;
+        border: 1px solid #ccd0d5;
+        background: #fff;
+        color: #080809;
+        font-size: 16px;
+      }
+      .data-source-primary-button {
+        min-width: 112px;
+        padding: 0 16px;
+        border: 1px solid #0866ff;
+        background: #0866ff;
+        color: #fff;
+      }
+      .data-source-primary-button:hover {
+        background: #0759e6;
+        border-color: #0759e6;
+      }
+      .data-source-primary-button:active,
+      .data-source-secondary-button:active,
+      .data-source-help-button:active {
+        transform: translateY(1px) scale(0.98);
+      }
+      .data-source-primary-button:disabled {
+        opacity: 0.6;
+        cursor: wait;
+      }
+      .data-source-guide-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .data-source-guide-back {
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: #e2e5e9;
+        color: #65686c;
+        cursor: pointer;
+      }
+      .data-source-guide-back:hover {
+        background: #d8dce1;
+      }
+      .data-source-guide-back svg {
+        width: 18px;
+        height: 18px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .data-source-guide {
+        color: #080809;
+        font-size: 13px;
+        line-height: 19px;
+      }
+      .data-source-guide h3 {
+        margin: 0 0 8px;
+        font-size: 15px;
+        line-height: 20px;
+      }
+      .data-source-guide ol {
+        margin: 0;
+        padding-left: 21px;
+      }
+      .data-source-guide li + li {
+        margin-top: 12px;
+      }
+      .data-source-guide code {
+        padding: 2px 5px;
+        border-radius: 4px;
+        background: #f0f2f5;
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        font-size: 12px;
+      }
+      .data-source-guide-note {
+        margin: 16px 0 0;
+        padding: 11px 12px;
+        border-radius: 8px;
+        background: #f2f7ff;
+        color: #445664;
+      }
+      @media (max-width: 560px) {
+        .data-source-modal-footer {
+          align-items: stretch;
+          flex-direction: column-reverse;
+        }
+        .data-source-footer-left,
+        .data-source-footer-right {
+          width: 100%;
+        }
+        .data-source-primary-button,
+        .data-source-secondary-button {
+          flex: 1;
+        }
+      }
+      body.data-source-modal-open {
+        overflow: hidden;
+      }
+      body.data-source-modal-open .export-progress-panel,
+      body.data-source-modal-open .export-frame-menu,
+      body.data-source-modal-open .control-sidebar,
+      body.data-source-modal-open .frame-switcher,
+      body.data-source-modal-open .preview-navigation {
+        visibility: hidden !important;
+        pointer-events: none !important;
+      }
+      @keyframes dataSourceModalIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px) scale(0.98);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
       }
 
       .verified-toggle-sidebar {
@@ -2181,8 +2611,7 @@
                     />
                   </div>
                   <div class="fbm-subline">
-                    <span>Ad</span><span>·</span
-                    ><span>Not connected to Kai Blue</span><span>·</span>
+                    <span>Ad</span><span>·</span>
                     <img
                       class="fbm-globe"
                       src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAABtUlEQVR4nGWR70sTcRzHX3d090DdTjNm7W74qHyUPTBlihb6QIrot0R/ggSCKCGICYUhFfhIECGIoCchUuEDCcOo1OlWa1GI080g6cfObeKV24Ox+/pgeqW9n75/fvhIQgjBDuaDISKRT/z+s4Wdz6OqCidramhqbNiVIAkhhGVZPHr8BJ/PoKX5NKWaBsDUq2nGxp9R4fFws7sTt9uFDDAy+pC2q5e5cumCI44urzD9+g0ACdPk3oMhAOSZ2TkURUX3HimQCRPbtlmKLpNKp50pyVSKyZdTHJgNLFB17CgA33/85M7AIIfKy9FKNf6FEIKFYAjZ2rQIhz+yuvqVwxUeujo70HUvsVic/chms0g9vbdEOr1R2CfLDNzuR9Pc/EokMHSdp2Pjzi0Hy8qQS4pLnATbtonF4yiKgs8wkCSJ69faOHumFYCi4iLkluZTe2o/f1n8b0omk0VVVS6eP4fcUO9H93odMvT+A3cH7/P8xYTTGo5EMAydE9XH/z5ueGSUdTPJVibjmPt6e3j7boZva2t03GjH5XIVDLuCwHyQuUAA00ySy+WorPRRV1tLvb/OCdkG86usolnucwIAAAAASUVORK5CYII="
@@ -2656,23 +3085,23 @@
           </section>
         </div>
         <aside class="control-sidebar">
-          <div class="export-menu-wrap">
+          <div class="sidebar-top-controls">
             <button
-              class="export-frames"
-              id="exportFrames"
+              class="data-source-button"
+              id="dataSourceButton"
               type="button"
-              aria-haspopup="true"
+              aria-haspopup="dialog"
+              aria-controls="dataSourceModal"
               aria-expanded="false"
-              aria-controls="exportFrameMenu"
             >
-              Export frame images
+              Data Source
             </button>
 
             <label
               class="verified-toggle verified-toggle-sidebar"
               data-tooltip="Enable or disable the verified badge"
             >
-              <input type="checkbox" id="verifiedToggle" checked />
+              <input type="checkbox" id="verifiedToggle" />
               <span class="verified-toggle-box" aria-hidden="true">
                 <svg viewBox="0 0 16 16" aria-hidden="true">
                   <path d="M3.2 8.2 6.5 11.2 12.8 4.9" />
@@ -2680,76 +3109,291 @@
               </span>
               <span class="verified-toggle-text">Verified</span>
             </label>
+          </div>
 
-            <div class="export-frame-menu" id="exportFrameMenu" hidden>
-              <div class="export-menu-header">
-                <div class="export-menu-title">Select frames to export</div>
-                <div class="export-menu-subtitle">
-                  Choose one or more preview formats.
-                </div>
-              </div>
-
-              <div class="export-frame-options">
-                <label class="export-frame-option">
-                  <input
-                    type="checkbox"
-                    name="exportFrame"
-                    value="facebook-desktop-feed"
-                    checked
-                  />
-                  <span class="export-checkbox-ui" aria-hidden="true"></span>
-                  <span class="export-option-copy">
-                    <span class="export-option-title"
-                      >Facebook Desktop Feed</span
-                    >
-                    <span class="export-option-size">Desktop preview</span>
-                  </span>
-                </label>
-
-                <label class="export-frame-option">
-                  <input
-                    type="checkbox"
-                    name="exportFrame"
-                    value="facebook-mobile-feed"
-                    checked
-                  />
-                  <span class="export-checkbox-ui" aria-hidden="true"></span>
-                  <span class="export-option-copy">
-                    <span class="export-option-title"
-                      >Facebook Mobile Feed</span
-                    >
-                    <span class="export-option-size">320 × 438.08</span>
-                  </span>
-                </label>
-
-                <label class="export-frame-option">
-                  <input
-                    type="checkbox"
-                    name="exportFrame"
-                    value="instagram-mobile-feed"
-                    checked
-                  />
-                  <span class="export-checkbox-ui" aria-hidden="true"></span>
-                  <span class="export-option-copy">
-                    <span class="export-option-title"
-                      >Instagram Mobile Feed</span
-                    >
-                    <span class="export-option-size">320 × 518</span>
-                  </span>
-                </label>
-              </div>
-
+          <div class="sidebar-bottom-controls">
+            <div class="export-menu-wrap">
               <button
-                class="export-confirm-button"
-                id="exportConfirmButton"
+                class="export-frames"
+                id="exportFrames"
                 type="button"
+                aria-haspopup="true"
+                aria-expanded="false"
+                aria-controls="exportFrameMenu"
               >
-                Export
+                Export frame images
               </button>
+
+              <div class="export-frame-menu" id="exportFrameMenu" hidden>
+                <div class="export-menu-header">
+                  <div class="export-menu-title">Select frames to export</div>
+                  <div class="export-menu-subtitle">
+                    Choose one or more preview formats.
+                  </div>
+                </div>
+
+                <div class="export-frame-options">
+                  <label class="export-frame-option">
+                    <input
+                      type="checkbox"
+                      name="exportFrame"
+                      value="facebook-desktop-feed"
+                      checked
+                    />
+                    <span class="export-checkbox-ui" aria-hidden="true"></span>
+                    <span class="export-option-copy">
+                      <span class="export-option-title"
+                        >Facebook Desktop Feed</span
+                      >
+                      <span class="export-option-size">Desktop preview</span>
+                    </span>
+                  </label>
+
+                  <label class="export-frame-option">
+                    <input
+                      type="checkbox"
+                      name="exportFrame"
+                      value="facebook-mobile-feed"
+                      checked
+                    />
+                    <span class="export-checkbox-ui" aria-hidden="true"></span>
+                    <span class="export-option-copy">
+                      <span class="export-option-title"
+                        >Facebook Mobile Feed</span
+                      >
+                      <span class="export-option-size">320 × 438.08</span>
+                    </span>
+                  </label>
+
+                  <label class="export-frame-option">
+                    <input
+                      type="checkbox"
+                      name="exportFrame"
+                      value="instagram-mobile-feed"
+                      checked
+                    />
+                    <span class="export-checkbox-ui" aria-hidden="true"></span>
+                    <span class="export-option-copy">
+                      <span class="export-option-title"
+                        >Instagram Mobile Feed</span
+                      >
+                      <span class="export-option-size">320 × 518</span>
+                    </span>
+                  </label>
+                </div>
+
+                <button
+                  class="export-confirm-button"
+                  id="exportConfirmButton"
+                  type="button"
+                >
+                  Export
+                </button>
+              </div>
             </div>
           </div>
         </aside>
       </div>
+
+      <section
+        class="data-source-modal"
+        id="dataSourceModal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="dataSourceModalTitle"
+        hidden
+      >
+        <button
+          class="data-source-modal-backdrop"
+          type="button"
+          data-close-data-source-modal
+          aria-label="Close Data Source"
+        ></button>
+        <div class="data-source-modal-dialog" tabindex="-1">
+          <header class="data-source-modal-header">
+            <div class="data-source-guide-header">
+              <button
+                class="data-source-guide-back"
+                id="dataSourceGuideBack"
+                type="button"
+                aria-label="Back to Data Source settings"
+                hidden
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m15 18-6-6 6-6"></path>
+                </svg>
+              </button>
+              <h2 class="data-source-modal-title" id="dataSourceModalTitle">
+                Data Source
+              </h2>
+            </div>
+            <button
+              class="data-source-modal-close"
+              id="dataSourceModalClose"
+              type="button"
+              aria-label="Close Data Source"
+              data-close-data-source-modal
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6 6 18 18M18 6 6 18"></path>
+              </svg>
+            </button>
+          </header>
+
+          <div class="data-source-page" id="dataSourceSettingsPage">
+            <div class="data-source-modal-body">
+              <p class="data-source-intro">
+                Choose which published CSV should supply the advertiser and ad
+                preview data.
+              </p>
+
+              <div class="data-source-options">
+                <label class="data-source-option">
+                  <input
+                    type="radio"
+                    name="dataSourceType"
+                    value="main"
+                    checked
+                  />
+                  <span class="data-source-option-copy">
+                    <span class="data-source-option-title">Main CSV</span>
+                    <span class="data-source-option-description"
+                      >Use the default data source included with this
+                      tool.</span
+                    >
+                  </span>
+                </label>
+
+                <label class="data-source-option">
+                  <input type="radio" name="dataSourceType" value="custom" />
+                  <span class="data-source-option-copy">
+                    <span class="data-source-option-title">Custom CSV URL</span>
+                    <span class="data-source-option-description"
+                      >Paste a Google Sheets “Publish to web” CSV link.</span
+                    >
+                  </span>
+                </label>
+              </div>
+
+              <div class="custom-csv-field" id="customCsvField" hidden>
+                <label class="custom-csv-label" for="customCsvUrl"
+                  >Published CSV link</label
+                >
+                <input
+                  class="custom-csv-input"
+                  id="customCsvUrl"
+                  type="url"
+                  inputmode="url"
+                  autocomplete="url"
+                  placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv"
+                />
+                <p class="custom-csv-hint">
+                  The link must be publicly accessible and return CSV data
+                  directly.
+                </p>
+              </div>
+
+              <p
+                class="data-source-inline-status"
+                id="dataSourceInlineStatus"
+                aria-live="polite"
+              ></p>
+            </div>
+
+            <footer class="data-source-modal-footer">
+              <div class="data-source-footer-left">
+                <button
+                  class="data-source-secondary-button"
+                  id="downloadSampleCsv"
+                  type="button"
+                >
+                  Download sample CSV
+                </button>
+                <button
+                  class="data-source-help-button"
+                  id="openDataSourceGuide"
+                  type="button"
+                  aria-label="How to prepare a CSV"
+                >
+                  ?
+                </button>
+              </div>
+              <div class="data-source-footer-right">
+                <button
+                  class="data-source-primary-button"
+                  id="applyDataSource"
+                  type="button"
+                >
+                  Apply source
+                </button>
+              </div>
+            </footer>
+          </div>
+
+          <div class="data-source-page" id="dataSourceGuidePage" hidden>
+            <div class="data-source-modal-body data-source-guide">
+              <h3>How to prepare and connect your CSV</h3>
+              <ol>
+                <li>
+                  Click <strong>Download sample CSV</strong>. Open it in Excel
+                  or import it into Google Sheets.
+                </li>
+                <li>
+                  Keep the header row unchanged: <code>advertiser_name</code>,
+                  <code>advertiser_image_url</code>, <code>slide_number</code>,
+                  <code>ad_image_url</code>, <code>headline</code>,
+                  <code>subtext</code>, <code>cta_text</code>,
+                  <code>post_message</code>, <code>source_url</code>, and
+                  <code>extracted_at</code>.
+                </li>
+                <li>
+                  Add one row per carousel image. Use the same
+                  <code>advertiser_name</code> for slides that belong to the
+                  same advertiser, and number <code>slide_number</code> in
+                  display order starting from 1.
+                </li>
+                <li>
+                  In Google Sheets, choose
+                  <strong>File → Share → Publish to web</strong>. Select the
+                  correct sheet tab, choose
+                  <strong>Comma-separated values (.csv)</strong>, and click
+                  <strong>Publish</strong>.
+                </li>
+                <li>
+                  Copy the published URL, return to this tool, select
+                  <strong>Custom CSV URL</strong>, paste the link, and click
+                  <strong>Apply source</strong>.
+                </li>
+              </ol>
+              <p class="data-source-guide-note">
+                Image and avatar URLs must be publicly accessible over HTTPS. A
+                normal Google Sheets edit/share link will not work; use the
+                published CSV link.
+              </p>
+            </div>
+            <footer class="data-source-modal-footer">
+              <div class="data-source-footer-left">
+                <button
+                  class="data-source-secondary-button"
+                  id="downloadSampleCsvGuide"
+                  type="button"
+                >
+                  Download sample CSV
+                </button>
+              </div>
+              <div class="data-source-footer-right">
+                <button
+                  class="data-source-primary-button"
+                  id="closeDataSourceGuide"
+                  type="button"
+                >
+                  Back to settings
+                </button>
+              </div>
+            </footer>
+          </div>
+        </div>
+      </section>
 
       <section
         class="export-progress-panel is-idle"
@@ -2765,8 +3409,18 @@
               Getting everything ready.
             </div>
           </div>
-          <div class="export-progress-percent" id="exportProgressPercent">
-            0%
+          <div class="export-progress-actions">
+            <div class="export-progress-percent" id="exportProgressPercent">
+              0%
+            </div>
+            <button
+              class="export-cancel-button"
+              id="exportCancelButton"
+              type="button"
+              hidden
+            >
+              Cancel
+            </button>
           </div>
         </div>
 
@@ -2779,6 +3433,39 @@
       const ad = document.getElementById('facebookAd');
       const frameSelect = document.getElementById('frameSelect');
       const exportFrames = document.getElementById('exportFrames');
+      const dataSourceButton = document.getElementById('dataSourceButton');
+      const dataSourceModal = document.getElementById('dataSourceModal');
+      const dataSourceModalDialog = dataSourceModal?.querySelector(
+        '.data-source-modal-dialog',
+      );
+      const dataSourceModalTitle = document.getElementById(
+        'dataSourceModalTitle',
+      );
+      const dataSourceSettingsPage = document.getElementById(
+        'dataSourceSettingsPage',
+      );
+      const dataSourceGuidePage = document.getElementById(
+        'dataSourceGuidePage',
+      );
+      const dataSourceGuideBack = document.getElementById(
+        'dataSourceGuideBack',
+      );
+      const openDataSourceGuide = document.getElementById(
+        'openDataSourceGuide',
+      );
+      const closeDataSourceGuide = document.getElementById(
+        'closeDataSourceGuide',
+      );
+      const customCsvField = document.getElementById('customCsvField');
+      const customCsvUrl = document.getElementById('customCsvUrl');
+      const applyDataSource = document.getElementById('applyDataSource');
+      const dataSourceInlineStatus = document.getElementById(
+        'dataSourceInlineStatus',
+      );
+      const downloadSampleCsv = document.getElementById('downloadSampleCsv');
+      const downloadSampleCsvGuide = document.getElementById(
+        'downloadSampleCsvGuide',
+      );
 
       const framePanels = [...document.querySelectorAll('.frame-panel')];
 
@@ -2828,6 +3515,15 @@
         'exportProgressPercent',
       );
       const exportProgressFill = document.getElementById('exportProgressFill');
+      const exportCancelButton = document.getElementById('exportCancelButton');
+      let exportAbortController = null;
+      let exportInProgress = false;
+
+      function throwIfExportCancelled() {
+        if (exportAbortController?.signal.aborted) {
+          throw new DOMException('Export cancelled by user.', 'AbortError');
+        }
+      }
 
       function setReadyStatus(detail = '') {
         exportProgressPanel.hidden = false;
@@ -2837,6 +3533,8 @@
         exportProgressTitle.textContent = 'Ready';
         exportProgressDetail.textContent = detail;
         exportProgressPercent.textContent = '';
+        exportCancelButton.hidden = true;
+        exportCancelButton.disabled = false;
       }
 
       function showExportProgress() {
@@ -2846,6 +3544,8 @@
           'is-error',
           'is-idle',
         );
+        exportCancelButton.hidden = false;
+        exportCancelButton.disabled = false;
         updateExportProgress(
           0,
           'Preparing export…',
@@ -2863,6 +3563,7 @@
       }
 
       function completeExportProgress(failedCount = 0, exportedCount = 0) {
+        exportCancelButton.hidden = true;
         exportProgressPanel.classList.remove('is-error', 'is-idle');
         exportProgressPanel.classList.add('is-complete');
 
@@ -2879,6 +3580,7 @@
       }
 
       function failExportProgress(message) {
+        exportCancelButton.hidden = true;
         exportProgressPanel.classList.remove('is-complete', 'is-idle');
         exportProgressPanel.classList.add('is-error');
         exportProgressFill.style.width = '100%';
@@ -2891,6 +3593,7 @@
       setReadyStatus();
 
       function setExportMenuOpen(isOpen) {
+        if (isOpen && exportInProgress) return;
         exportFrameMenu.hidden = !isOpen;
         exportFrames.setAttribute('aria-expanded', String(isOpen));
 
@@ -3224,6 +3927,54 @@
         });
       }
 
+      async function waitForVisibleFrameImages(element, timeout = 20000) {
+        const startedAt = performance.now();
+
+        while (performance.now() - startedAt < timeout) {
+          const frameRect = element.getBoundingClientRect();
+          const visibleImages = [...element.querySelectorAll('img')].filter(
+            (img) => {
+              const rect = img.getBoundingClientRect();
+              return (
+                rect.width > 0 &&
+                rect.height > 0 &&
+                rect.right > frameRect.left &&
+                rect.left < frameRect.right &&
+                rect.bottom > frameRect.top &&
+                rect.top < frameRect.bottom
+              );
+            },
+          );
+
+          const ready = visibleImages.every(
+            (img) =>
+              img.complete && img.naturalWidth > 0 && img.naturalHeight > 0,
+          );
+
+          if (ready) {
+            await Promise.all(
+              visibleImages.map(async (img) => {
+                if (typeof img.decode === 'function') {
+                  try {
+                    await img.decode();
+                  } catch {
+                    // Some browsers reject decode() even after the image is usable.
+                  }
+                }
+              }),
+            );
+            await waitForFramePaint(2);
+            return;
+          }
+
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+
+        throw new Error(
+          'Visible ad images did not finish loading before export.',
+        );
+      }
+
       async function preloadExportImages(frameValues) {
         const uniqueSources = new Set();
 
@@ -3377,8 +4128,14 @@
       }
 
       async function exportSelectedFrames() {
+        if (exportInProgress) return;
+
         const selectedFrames = getSelectedExportFrames();
         if (!selectedFrames.length) return;
+
+        exportInProgress = true;
+        exportAbortController = new AbortController();
+        exportFrames.disabled = true;
 
         const previousFrame = frameSelect.value;
         const previousDesktopIndex = currentIndex;
@@ -3417,8 +4174,10 @@
           );
 
           await preloadExportImages(selectedFrames);
+          throwIfExportCancelled();
 
           for (const task of frameTasks) {
+            throwIfExportCancelled();
             const { frameValue, maxIndex } = task;
 
             frameSelect.value = frameValue;
@@ -3435,6 +4194,7 @@
               .join(' ');
 
             for (let index = 0; index <= maxIndex; index++) {
+              throwIfExportCancelled();
               updateExportProgress(
                 20 + (completedImages / Math.max(1, totalImages)) * 68,
                 `Rendering ${frameTitle}`,
@@ -3443,9 +4203,18 @@
 
               exportConfirmButton.textContent = `Exporting ${completedImages + 1}/${totalImages}…`;
               await setFramePosition(frameValue, index);
+              throwIfExportCancelled();
+              updateExportProgress(
+                20 + (completedImages / Math.max(1, totalImages)) * 68,
+                `Loading ${frameTitle}`,
+                `Waiting for ad image ${index + 1} to finish loading.`,
+              );
+              await waitForVisibleFrameImages(frameElement);
+              throwIfExportCancelled();
 
               try {
                 const blob = await exportElementAsPNG(frameElement);
+                throwIfExportCancelled();
                 const fileName = `${baseFileName}__${folderName}__${String(index + 1).padStart(2, '0')}.png`;
 
                 zipEntries.push({
@@ -3479,6 +4248,8 @@
             }
           }
 
+          throwIfExportCancelled();
+
           if (!zipEntries.length) {
             throw new Error(
               'All selected ad images failed to export, so no ZIP file could be created.',
@@ -3493,6 +4264,10 @@
               ? `Compressing ${zipEntries.length} successful export${zipEntries.length === 1 ? '' : 's'}. ${failedExports.length} failed image${failedExports.length === 1 ? '' : 's'} will be skipped.`
               : 'Compressing all exported images into one download.',
           );
+
+          throwIfExportCancelled();
+          exportCancelButton.disabled = true;
+          exportCancelButton.textContent = 'Finishing…';
 
           await downloadZipFile(
             `${baseFileName}__frame-exports.zip`,
@@ -3514,7 +4289,13 @@
           }
         } catch (error) {
           if (error && error.name === 'AbortError') {
-            updateExportProgress(0, 'Export cancelled', 'No file was saved.');
+            exportCancelButton.hidden = true;
+            updateExportProgress(
+              0,
+              'Export cancelled',
+              'The remaining images were not exported and no ZIP was created.',
+            );
+            setTimeout(() => setReadyStatus(), 3000);
           } else {
             console.error(error);
             failExportProgress(error.message);
@@ -3541,8 +4322,170 @@
 
           exportConfirmButton.disabled = false;
           exportConfirmButton.textContent = 'Export';
+          exportCancelButton.textContent = 'Cancel';
+          exportCancelButton.disabled = false;
+          exportFrames.disabled = false;
+          exportAbortController = null;
+          exportInProgress = false;
         }
       }
+
+      const SAMPLE_CSV = `advertiser_name,advertiser_image_url,slide_number,ad_image_url,headline,subtext,cta_text,post_message,source_url,extracted_at
+Demo Brand,https://example.com/advertiser-image.jpg,1,https://example.com/ad-image-1.jpg,Demo product title,Optional lighter subtext,Shop now,"Write the Facebook and Instagram ad copy here.",https://example.com/product-1,2026-07-29T10:00:00Z
+Demo Brand,https://example.com/advertiser-image.jpg,2,https://example.com/ad-image-2.jpg,Second product title,,Learn more,"Write the Facebook and Instagram ad copy here.",https://example.com/product-2,2026-07-29T10:05:00Z`;
+
+      function downloadSampleCsvFile() {
+        const blob = new Blob([SAMPLE_CSV], { type: 'text/csv;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'ad-preview-sample.csv';
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+
+      function setDataSourcePage(page) {
+        const showGuide = page === 'guide';
+        dataSourceSettingsPage.hidden = showGuide;
+        dataSourceGuidePage.hidden = !showGuide;
+        dataSourceGuideBack.hidden = !showGuide;
+        dataSourceModalTitle.textContent = showGuide
+          ? 'CSV setup guide'
+          : 'Data Source';
+        requestAnimationFrame(() => {
+          (showGuide ? dataSourceGuideBack : dataSourceModalDialog)?.focus();
+        });
+      }
+
+      function syncCustomCsvVisibility() {
+        const selected = document.querySelector(
+          'input[name="dataSourceType"]:checked',
+        )?.value;
+        customCsvField.hidden = selected !== 'custom';
+        dataSourceInlineStatus.textContent = '';
+        dataSourceInlineStatus.className = 'data-source-inline-status';
+        if (selected === 'custom')
+          requestAnimationFrame(() => customCsvUrl?.focus());
+      }
+
+      document
+        .querySelectorAll('input[name="dataSourceType"]')
+        .forEach((radio) => {
+          radio.addEventListener('change', syncCustomCsvVisibility);
+        });
+
+      openDataSourceGuide?.addEventListener('click', () =>
+        setDataSourcePage('guide'),
+      );
+      closeDataSourceGuide?.addEventListener('click', () =>
+        setDataSourcePage('settings'),
+      );
+      dataSourceGuideBack?.addEventListener('click', () =>
+        setDataSourcePage('settings'),
+      );
+      downloadSampleCsv?.addEventListener('click', downloadSampleCsvFile);
+      downloadSampleCsvGuide?.addEventListener('click', downloadSampleCsvFile);
+
+      applyDataSource?.addEventListener('click', async () => {
+        const type =
+          document.querySelector('input[name="dataSourceType"]:checked')
+            ?.value || 'main';
+        const customUrl = customCsvUrl?.value.trim() || '';
+
+        if (type === 'custom') {
+          try {
+            const parsed = new URL(customUrl);
+            if (!/^https:$/.test(parsed.protocol)) throw new Error();
+          } catch {
+            dataSourceInlineStatus.textContent =
+              'Paste a valid public HTTPS CSV URL.';
+            dataSourceInlineStatus.className =
+              'data-source-inline-status is-error';
+            customCsvUrl?.focus();
+            return;
+          }
+        }
+
+        applyDataSource.disabled = true;
+        applyDataSource.textContent = 'Loading…';
+        dataSourceInlineStatus.textContent = 'Loading the selected CSV…';
+        dataSourceInlineStatus.className = 'data-source-inline-status';
+
+        try {
+          await window.loadAdPreviewCSV?.(type === 'custom' ? customUrl : null);
+          if (type === 'custom') {
+            localStorage.setItem('adPreviewCustomCsvUrl', customUrl);
+            localStorage.setItem('adPreviewDataSourceType', 'custom');
+          } else {
+            localStorage.setItem('adPreviewDataSourceType', 'main');
+          }
+          dataSourceInlineStatus.textContent =
+            'Data source loaded successfully.';
+          dataSourceInlineStatus.className =
+            'data-source-inline-status is-success';
+          setTimeout(() => setDataSourceModalOpen(false), 550);
+        } catch (error) {
+          dataSourceInlineStatus.textContent =
+            error?.message || 'The CSV could not be loaded.';
+          dataSourceInlineStatus.className =
+            'data-source-inline-status is-error';
+        } finally {
+          applyDataSource.disabled = false;
+          applyDataSource.textContent = 'Apply source';
+        }
+      });
+
+      function setDataSourceModalOpen(isOpen) {
+        if (!dataSourceModal || !dataSourceButton) return;
+
+        dataSourceModal.hidden = !isOpen;
+        dataSourceButton.setAttribute('aria-expanded', String(isOpen));
+        document.body.classList.toggle('data-source-modal-open', isOpen);
+
+        if (isOpen) {
+          setExportMenuOpen(false);
+          exportProgressPanel?.classList.remove('is-visible');
+          setDataSourcePage('settings');
+          const savedType =
+            localStorage.getItem('adPreviewDataSourceType') || 'main';
+          const savedCustomUrl =
+            localStorage.getItem('adPreviewCustomCsvUrl') || '';
+          const selectedRadio = document.querySelector(
+            `input[name="dataSourceType"][value="${savedType === 'custom' ? 'custom' : 'main'}"]`,
+          );
+          if (selectedRadio) selectedRadio.checked = true;
+          if (customCsvUrl && savedCustomUrl)
+            customCsvUrl.value = savedCustomUrl;
+          syncCustomCsvVisibility();
+          requestAnimationFrame(() => dataSourceModalDialog?.focus());
+        } else {
+          dataSourceButton.focus();
+        }
+      }
+
+      dataSourceButton?.addEventListener('click', () => {
+        setDataSourceModalOpen(true);
+      });
+
+      dataSourceModal?.addEventListener('click', (event) => {
+        if (event.target.closest('[data-close-data-source-modal]')) {
+          setDataSourceModalOpen(false);
+        }
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (
+          event.key === 'Escape' &&
+          dataSourceModal &&
+          !dataSourceModal.hidden
+        ) {
+          event.preventDefault();
+          setDataSourceModalOpen(false);
+        }
+      });
 
       exportFrames.addEventListener('click', (event) => {
         event.stopPropagation();
@@ -3556,7 +4499,18 @@
       exportConfirmButton.addEventListener('click', (event) => {
         event.preventDefault();
         event.stopPropagation();
+        setExportMenuOpen(false);
         exportSelectedFrames();
+      });
+
+      exportCancelButton.addEventListener('click', () => {
+        if (!exportInProgress || !exportAbortController) return;
+        exportCancelButton.disabled = true;
+        exportCancelButton.textContent = 'Cancelling…';
+        exportProgressTitle.textContent = 'Cancelling export…';
+        exportProgressDetail.textContent =
+          'Stopping after the current image operation finishes.';
+        exportAbortController.abort();
       });
 
       document.addEventListener('click', () => {
@@ -3950,7 +4904,7 @@
 
     <script>
       (() => {
-        const CSV_URL =
+        const MAIN_CSV_URL =
           'https://docs.google.com/spreadsheets/d/e/2PACX-1vQWy_Q9tVr-BCfl1RtZe7qb-oQkNIDJhzgWbtqFWrjP3RhjyU1OIz0sM4kNkKmPM0SqC6awYFZJeGTF/pub?output=csv';
         const advertiserSelect = document.getElementById('advertiserSelect');
         const advertiserSelectWrap = document.querySelector(
@@ -4441,7 +5395,7 @@
           renderAdvertiser(event.target.value);
         });
 
-        async function loadCSV() {
+        async function loadCSV(sourceURL = MAIN_CSV_URL) {
           try {
             csvStatus.textContent = 'Loading CSV…';
             csvStatus.classList.remove('is-error');
@@ -4456,7 +5410,7 @@
               'Fetching advertiser data.',
             );
 
-            const response = await fetch(CSV_URL, { cache: 'no-store' });
+            const response = await fetch(sourceURL, { cache: 'no-store' });
             if (!response.ok)
               throw new Error(`CSV request failed (${response.status})`);
 
@@ -4475,10 +5429,27 @@
             csvStatus.textContent = 'CSV could not be loaded';
             csvStatus.classList.add('is-error');
             failExportProgress('CSV could not be loaded.');
+            throw error;
           }
         }
 
-        loadCSV();
+        window.loadAdPreviewCSV = (customURL) =>
+          loadCSV(customURL || MAIN_CSV_URL);
+
+        const initialSourceType = localStorage.getItem(
+          'adPreviewDataSourceType',
+        );
+        const initialCustomURL = localStorage.getItem('adPreviewCustomCsvUrl');
+        loadCSV(
+          initialSourceType === 'custom' && initialCustomURL
+            ? initialCustomURL
+            : MAIN_CSV_URL,
+        ).catch(() => {
+          if (initialSourceType === 'custom') {
+            localStorage.setItem('adPreviewDataSourceType', 'main');
+            loadCSV(MAIN_CSV_URL).catch(() => {});
+          }
+        });
       })();
     </script>
 
