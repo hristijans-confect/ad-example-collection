@@ -4016,7 +4016,7 @@
         sandbox.style.position = 'fixed';
         sandbox.style.left = '-10000px';
         sandbox.style.top = '0';
-        sandbox.style.padding = '24px';
+        sandbox.style.padding = '12px';
         sandbox.style.background = 'transparent';
         sandbox.style.zIndex = '2147483647';
         sandbox.style.opacity = '1';
@@ -4114,8 +4114,70 @@
 
         sandbox.remove();
 
+        function trimTransparentCanvas(
+          sourceCanvas,
+          extraMargin = 4,
+          alphaThreshold = 1,
+        ) {
+          const width = sourceCanvas.width;
+          const height = sourceCanvas.height;
+          const context = sourceCanvas.getContext('2d', {
+            willReadFrequently: true,
+          });
+          const { data } = context.getImageData(0, 0, width, height);
+
+          let minX = width;
+          let minY = height;
+          let maxX = -1;
+          let maxY = -1;
+
+          for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+              const alpha = data[(y * width + x) * 4 + 3];
+              if (alpha >= alphaThreshold) {
+                if (x < minX) minX = x;
+                if (y < minY) minY = y;
+                if (x > maxX) maxX = x;
+                if (y > maxY) maxY = y;
+              }
+            }
+          }
+
+          if (maxX < minX || maxY < minY) {
+            return sourceCanvas;
+          }
+
+          minX = Math.max(0, minX - extraMargin);
+          minY = Math.max(0, minY - extraMargin);
+          maxX = Math.min(width - 1, maxX + extraMargin);
+          maxY = Math.min(height - 1, maxY + extraMargin);
+
+          const trimmedWidth = maxX - minX + 1;
+          const trimmedHeight = maxY - minY + 1;
+          const trimmedCanvas = document.createElement('canvas');
+          trimmedCanvas.width = trimmedWidth;
+          trimmedCanvas.height = trimmedHeight;
+          trimmedCanvas
+            .getContext('2d')
+            .drawImage(
+              sourceCanvas,
+              minX,
+              minY,
+              trimmedWidth,
+              trimmedHeight,
+              0,
+              0,
+              trimmedWidth,
+              trimmedHeight,
+            );
+
+          return trimmedCanvas;
+        }
+
+        const croppedCanvas = trimTransparentCanvas(canvas, 4, 1);
+
         const blob = await new Promise((resolve, reject) => {
-          canvas.toBlob((result) => {
+          croppedCanvas.toBlob((result) => {
             if (result) {
               resolve(result);
             } else {
