@@ -3931,17 +3931,28 @@
         const startedAt = performance.now();
 
         while (performance.now() - startedAt < timeout) {
-          const frameRect = element.getBoundingClientRect();
+          const visibilityRoot =
+            element.querySelector(
+              '.carousel-viewport, .fbm-carousel-viewport, .igm-carousel-viewport',
+            ) || element;
+          const frameRect = visibilityRoot.getBoundingClientRect();
+          const isDesktopViewport =
+            visibilityRoot.classList.contains('carousel-viewport');
+          const visibilityBuffer = isDesktopViewport ? 420 : 160;
+
           const visibleImages = [...element.querySelectorAll('img')].filter(
             (img) => {
-              const rect = img.getBoundingClientRect();
+              const visibilityTarget =
+                img.closest('.product-card,.fbm-card,.igm-slide') || img;
+              const rect = visibilityTarget.getBoundingClientRect();
+
               return (
                 rect.width > 0 &&
                 rect.height > 0 &&
-                rect.right > frameRect.left &&
-                rect.left < frameRect.right &&
-                rect.bottom > frameRect.top &&
-                rect.top < frameRect.bottom
+                rect.right > frameRect.left - visibilityBuffer &&
+                rect.left < frameRect.right + visibilityBuffer &&
+                rect.bottom > frameRect.top - visibilityBuffer &&
+                rect.top < frameRect.bottom + visibilityBuffer
               );
             },
           );
@@ -4030,6 +4041,11 @@
         }
 
         const elementRect = element.getBoundingClientRect();
+        const visibilityRoot =
+          element.querySelector(
+            '.carousel-viewport, .fbm-carousel-viewport, .igm-carousel-viewport',
+          ) || element;
+        const visibilityRect = visibilityRoot.getBoundingClientRect();
         const originalCreatives = [
           ...element.querySelectorAll('.ad-creative,.fbm-image,.igm-image'),
         ];
@@ -4046,22 +4062,28 @@
           img.loading = 'eager';
         });
 
-        // Mobile carousels keep every slide in the DOM. Do not let a remote
-        // image several slides off-screen break the currently visible export.
-        // Replace only fully off-screen creative images in the clone with a
-        // transparent pixel; visible and partially visible cards remain intact.
+        // Keep the partially visible neighboring cards that appear on the
+        // left/right edges of Facebook and Instagram carousels. Only swap out
+        // creative images that are clearly farther away than the visible
+        // carousel region plus one extra card-width buffer.
         const transparentPixel =
           'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
         const clonedCreatives = [
           ...clone.querySelectorAll('.ad-creative,.fbm-image,.igm-image'),
         ];
+        const isDesktopViewport =
+          visibilityRoot.classList.contains('carousel-viewport');
+        const visibilityBuffer = isDesktopViewport ? 900 : 340;
         originalCreatives.forEach((originalImg, index) => {
-          const rect = originalImg.getBoundingClientRect();
+          const visibilityTarget =
+            originalImg.closest('.product-card,.fbm-card,.igm-slide') ||
+            originalImg;
+          const rect = visibilityTarget.getBoundingClientRect();
           const intersects =
-            rect.right > elementRect.left &&
-            rect.left < elementRect.right &&
-            rect.bottom > elementRect.top &&
-            rect.top < elementRect.bottom;
+            rect.right > visibilityRect.left - visibilityBuffer &&
+            rect.left < visibilityRect.right + visibilityBuffer &&
+            rect.bottom > visibilityRect.top - visibilityBuffer &&
+            rect.top < visibilityRect.bottom + visibilityBuffer;
 
           if (!intersects && clonedCreatives[index]) {
             clonedCreatives[index].src = transparentPixel;
