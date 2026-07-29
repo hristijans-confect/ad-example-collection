@@ -1,0 +1,4600 @@
+<!doctype html>
+<html lang="mk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Facebook Carousel Ad Preview</title>
+    <style>
+      :root {
+        --card-background: #fff;
+        --primary-text: #080809;
+        --secondary-text: #65686c;
+        --secondary-button-background: #e2e5e9;
+        --fb-logo: #0866ff;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: #f0f2f5;
+      }
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        color: var(--primary-text);
+        -webkit-font-smoothing: antialiased;
+      }
+      button {
+        font: inherit;
+      }
+
+      .frame-toolbar {
+        width: min(980px, 100%);
+        min-height: 69px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 0 8px;
+        border-bottom: 1px solid #d8dce1;
+        margin-bottom: 14px;
+      }
+      .preview-workspace {
+        width: min(980px, 100%);
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 18px;
+      }
+      .preview-stage {
+        flex: none;
+      }
+      .control-sidebar {
+        width: 230px;
+        flex: none;
+        position: sticky;
+        top: 18px;
+      }
+      .control-sidebar .export-menu-wrap {
+        width: 100%;
+      }
+      .control-sidebar .export-frames {
+        width: 100%;
+        height: 42px;
+      }
+      .frame-select-wrap {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+      }
+      .frame-select {
+        appearance: none;
+        -webkit-appearance: none;
+        height: 36px;
+        min-width: 128px;
+        padding: 0 37px 0 16px;
+        border: 0;
+        border-radius: 7px;
+        background: #f0f2f5;
+        color: #080809;
+        font-size: 14px;
+        line-height: 36px;
+        cursor: pointer;
+        outline: none;
+      }
+      .frame-select-wrap::after {
+        content: '';
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        width: 0;
+        height: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 6px solid #1c1e21;
+        transform: translateY(-35%);
+        pointer-events: none;
+      }
+      .frame-select:focus-visible {
+        outline: 2px solid #0866ff;
+        outline-offset: 2px;
+      }
+      .export-frames {
+        height: 36px;
+        padding: 0 16px;
+        border: 0;
+        border-radius: 7px;
+        background: #e2e5e9;
+        color: #080809;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .export-frames:hover {
+        background: #d8dce1;
+      }
+      @media (max-width: 706px) {
+        .frame-toolbar {
+          width: 100%;
+          margin-bottom: 10px;
+          padding: 0 10px;
+        }
+        .export-frames {
+          padding: 0 12px;
+        }
+      }
+
+      .canvas {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 9px 12px 108px;
+      }
+      .frame-panel {
+        width: 682px;
+      }
+      .frame-panel[hidden] {
+        display: none !important;
+      }
+      .future-frame {
+        width: 100%;
+        min-height: 420px;
+        display: grid;
+        place-items: center;
+        align-content: center;
+        gap: 8px;
+        border: 1px dashed #ccd0d5;
+        border-radius: 16px;
+        background: #fff;
+        color: #65686c;
+      }
+      .future-frame-title {
+        color: #080809;
+        font-size: 18px;
+        font-weight: 600;
+      }
+      .future-frame-note {
+        font-size: 14px;
+      }
+      @media (max-width: 706px) {
+        .frame-panel {
+          width: 100%;
+        }
+      }
+      .facebook-ad {
+        --media-height: 294px;
+        --carousel-height: var(--carousel-height);
+        width: 682px;
+        height: auto;
+        background: #fff;
+        border: 1px solid #d8dce1;
+        border-radius: 16px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: height 0.2s ease;
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          Roboto,
+          Helvetica,
+          Arial,
+          sans-serif;
+      }
+      .post-header {
+        height: 61px;
+        display: flex;
+        align-items: center;
+        padding: 11px 14px 6px 12px;
+      }
+      .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex: none;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        background: #fff;
+      }
+      .page-meta {
+        margin-left: 9px;
+      }
+      .page-name {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        height: 20px;
+        font-size: 15px;
+        line-height: 20px;
+        font-weight: 600;
+      }
+      .verified {
+        display: block;
+        width: 16px;
+        height: 16px;
+        object-fit: contain;
+        flex: none;
+        transform: translateY(0.25px);
+      }
+      .sponsored {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        color: #65686c;
+        font-size: 13px;
+        line-height: 17px;
+      }
+      .privacy-globe-icon {
+        width: 12px;
+        height: 12px;
+        display: block;
+        object-fit: contain;
+        flex: none;
+      }
+      .header-actions {
+        margin-left: auto;
+        display: flex;
+        gap: 5px;
+        align-self: flex-start;
+        margin-top: 5px;
+      }
+      .plain-icon {
+        border: 0;
+        background: transparent;
+        padding: 0;
+        width: 31px;
+        height: 31px;
+        display: grid;
+        place-items: center;
+        color: #65686c;
+        cursor: pointer;
+        border-radius: 50%;
+      }
+      .plain-icon:hover {
+        background: #f2f4f7;
+      }
+      .plain-icon svg {
+        width: 22px;
+        height: 22px;
+      }
+      .more svg {
+        fill: currentColor;
+      }
+      .close svg {
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+      }
+      .post-copy {
+        padding: 0 12px 8px;
+        font-size: 15px;
+        line-height: 20px;
+      }
+      .copy-line {
+        color: #080809;
+      }
+      .copy-line-text {
+        display: inline;
+      }
+      .copy-line.is-expanded {
+        min-height: 0;
+      }
+      .see-more {
+        border: 0;
+        background: transparent;
+        padding: 0;
+        margin: 0 0 0 4px;
+        font-size: 15px;
+        line-height: 20px;
+        font-weight: 600;
+        cursor: pointer;
+        color: #080809;
+        display: inline;
+        vertical-align: baseline;
+      }
+      .see-more[hidden] {
+        display: none !important;
+      }
+      .carousel-viewport {
+        position: relative;
+        margin-left: 12px;
+        width: 668px;
+        height: var(--carousel-height);
+        overflow: hidden;
+      }
+      .carousel-viewport.is-scrolled {
+        margin-left: 0;
+        width: 680px;
+      }
+      .carousel-track {
+        height: var(--carousel-height);
+        display: flex;
+        gap: 4px;
+        transform: translateX(0);
+        transition: transform 0.28s cubic-bezier(0.17, 0.17, 0, 1);
+      }
+      .product-card {
+        flex: 0 0 294px;
+        height: var(--carousel-height);
+        background: #fff;
+        border: 1px solid #d8dce1;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .ad-creative {
+        display: block;
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+        aspect-ratio: 1 / 1;
+        background: #f0f2f5;
+      }
+      .product-card[data-ratio='4:5'] .ad-creative {
+        aspect-ratio: 4 / 5;
+      }
+      .product-footer {
+        height: 73px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0 12px;
+        background: #fff;
+        border-top: 1px solid #d8dce1;
+      }
+      .footer-copy-wrap {
+        min-width: 0;
+        flex: 1 1 auto;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        overflow: hidden;
+      }
+      .footer-copy {
+        min-width: 0;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        white-space: normal;
+        font-size: 14px;
+        line-height: 17px;
+        font-weight: 700;
+        color: #050505;
+      }
+      .footer-subtext {
+        margin-top: 1px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-family: inherit;
+        font-size: 12px;
+        line-height: 1.34;
+        font-weight: 400;
+        color: #65676b;
+        -webkit-font-smoothing: antialiased;
+      }
+      .footer-copy-wrap.has-subtext .footer-copy {
+        -webkit-line-clamp: 2;
+      }
+      .shop-button {
+        flex: 0 0 auto;
+        min-width: max-content;
+        white-space: nowrap;
+        border: 0;
+        border-radius: 10px;
+        background: #e4e6eb;
+        color: #050505;
+        font-size: 14px;
+        line-height: 18px;
+        font-weight: 700;
+        padding: 11px 16px;
+        cursor: pointer;
+      }
+      .carousel-prev,
+      .carousel-next {
+        position: absolute;
+        top: calc((var(--carousel-height) - 50px) / 2);
+        width: 50px;
+        height: 50px;
+        border: 1px solid #ccd0d5;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.18);
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        transition:
+          opacity 0.18s ease,
+          transform 0.18s ease,
+          background 0.18s ease;
+        z-index: 3;
+      }
+      .carousel-prev {
+        left: 16px;
+      }
+      .carousel-next {
+        right: 16px;
+      }
+      .carousel-prev:hover,
+      .carousel-next:hover {
+        background: #f7f8fa;
+      }
+      .carousel-prev[hidden],
+      .carousel-next[hidden] {
+        display: none;
+      }
+      .carousel-prev svg,
+      .carousel-next svg {
+        width: 24px;
+        height: 24px;
+        fill: none;
+        stroke: #65686c;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .engagement-row {
+        height: 51px;
+        padding: 0 14px 0 13px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .desktop-action-row {
+        height: 44px;
+        justify-content: flex-start;
+        align-items: flex-start;
+        padding: 3px 14px 4px 13px;
+      }
+      .desktop-action-group {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        height: 37px;
+      }
+      .desktop-action-button {
+        position: relative;
+        z-index: 0;
+        flex: 0 0 auto;
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 33px;
+        height: 37px;
+        padding: 6px 4px;
+        border: 0;
+        border-radius: 6px;
+        background: transparent;
+        color: #59636f;
+        cursor: pointer;
+        user-select: none;
+        white-space: nowrap;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .desktop-action-button:hover {
+        background: #f2f2f2;
+      }
+      .desktop-action-button svg {
+        width: 25px;
+        height: 25px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.65;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .desktop-action-button .desktop-share-icon {
+        width: 25px;
+        height: 25px;
+        display: block;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.65;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .engagement-left {
+        display: flex;
+        align-items: center;
+        height: 100%;
+      }
+      .engagement-icon {
+        border: 0;
+        background: transparent;
+        width: 31px;
+        height: 36px;
+        padding: 4px;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+      }
+      .engagement-icon svg {
+        width: 22px;
+        height: 22px;
+        fill: none;
+        stroke: #59636f;
+        stroke-width: 1.65;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .reaction-count {
+        margin-left: 0;
+        margin-right: 13px;
+        color: #65676b;
+        font-size: 13px;
+      }
+      .comment {
+        margin-right: 4px;
+      }
+      .reaction-bubble {
+        border: 0;
+        background: #1877f2;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        padding: 2px;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+      }
+      .reaction-bubble svg {
+        width: 14px;
+        height: 14px;
+        fill: #fff;
+        stroke: none;
+      }
+      @media (max-width: 706px) {
+        .canvas {
+          display: block;
+          padding: 0;
+          overflow: hidden;
+        }
+        .facebook-ad {
+          transform-origin: top left;
+        }
+      }
+
+      .fb-mobile-ad {
+        width: 320px;
+        background: #fff;
+        border: 1px solid #dadde1;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          Roboto,
+          Helvetica,
+          Arial,
+          sans-serif;
+      }
+      .fbm-header {
+        min-height: 49px;
+        display: flex;
+        align-items: center;
+        padding: 7px 8px 5px;
+      }
+      .fbm-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        flex: none;
+        background: #fbf5f1;
+        color: #9c745e;
+        font-family: Georgia, serif;
+        font-size: 9px;
+        font-weight: 400;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+      }
+      .fbm-meta {
+        min-width: 0;
+        margin-left: 8px;
+        flex: 1;
+      }
+      .fbm-page-name {
+        font-size: 14px;
+        line-height: 17px;
+        font-weight: 600;
+      }
+      .fbm-subline {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        white-space: nowrap;
+        overflow: hidden;
+        color: #65676b;
+        font-size: 10px;
+        line-height: 14px;
+      }
+      .fbm-globe {
+        width: 11px;
+        height: 11px;
+        flex: none;
+      }
+      .fbm-actions {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .fbm-actions button {
+        width: 28px;
+        height: 28px;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        color: #050505;
+        font-size: 22px;
+        line-height: 1;
+        display: grid;
+        place-items: center;
+        padding: 0;
+      }
+      .fbm-actions button:first-child {
+        color: #65676b;
+      }
+      .fbm-actions button:first-child svg {
+        width: 20px;
+        height: 20px;
+        display: block;
+        fill: currentColor;
+      }
+      .fbm-actions button:last-child {
+        color: #65676b;
+        font-size: 28px;
+        transform: translateY(-1px);
+      }
+
+      .fbm-carousel-viewport {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+        padding: 0 18px;
+      }
+      .fbm-carousel-track {
+        display: flex;
+        gap: 4px;
+        transition: transform 0.25s cubic-bezier(0.17, 0.17, 0, 1);
+      }
+      .fbm-card {
+        flex: 0 0 var(--fbm-card-width, 230px);
+        width: var(--fbm-card-width, 230px);
+        border: 1px solid #dadde1;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #fff;
+      }
+      .fbm-image {
+        display: block;
+        width: var(--fbm-card-width, 230px);
+        height: var(--fbm-image-height, 230px);
+        object-fit: cover;
+      }
+      .fbm-card-footer {
+        height: 58px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 8px 0 10px;
+        background: #fff;
+        border-top: 1px solid #d8dce1;
+      }
+      .fbm-copy-wrap {
+        min-width: 0;
+        flex: 1 1 auto;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        overflow: hidden;
+      }
+      .fbm-headline {
+        min-width: 0;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        white-space: normal;
+        font-size: 12px;
+        line-height: 15px;
+        font-weight: 700;
+        color: #050505;
+      }
+      .fbm-subtext {
+        margin-top: 1px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-family: inherit;
+        font-size: 12px;
+        line-height: 1.34;
+        font-weight: 400;
+        color: #65676b;
+        -webkit-font-smoothing: antialiased;
+      }
+      .fbm-card-footer button {
+        flex: 0 0 auto;
+        min-width: max-content;
+        white-space: nowrap;
+        border: 0;
+        border-radius: 9px;
+        background: #e4e6eb;
+        color: #050505;
+        font-size: 12px;
+        line-height: 15px;
+        font-weight: 700;
+        padding: 9px 12px;
+        cursor: pointer;
+      }
+      .fbm-prev,
+      .fbm-next {
+        position: absolute;
+        top: 116px;
+        width: 18px;
+        height: 32px;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+        display: grid;
+        place-items: center;
+        z-index: 4;
+        padding: 0;
+      }
+      .fbm-prev {
+        left: 34px;
+      }
+      .fbm-next {
+        right: 34px;
+      }
+      .fbm-prev[hidden],
+      .fbm-next[hidden] {
+        display: none;
+      }
+      .fbm-prev img,
+      .fbm-next img {
+        display: block;
+        width: 18px;
+        height: 32px;
+        object-fit: contain;
+        pointer-events: none;
+      }
+      .fbm-footer {
+        height: 52px;
+        margin-top: 15px;
+        border-top: 1px solid #e4e6eb;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        padding: 0 8px;
+      }
+      .fbm-footer-action {
+        min-width: 96px;
+        height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        border: 0;
+        border-radius: 6px;
+        background: transparent;
+        color: #65676b;
+        font-size: 13px;
+        line-height: 16px;
+        font-weight: 500;
+        padding: 0 8px;
+      }
+      .fbm-footer-action svg {
+        width: 21px;
+        height: 21px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.65;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .fbm-footer-action .fbm-share-icon {
+        width: 21px;
+        height: 21px;
+        display: block;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.65;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .fbm-footer-action:hover {
+        background: rgba(0, 0, 0, 0.05);
+      }
+
+      .ig-mobile-ad {
+        width: 320px;
+        min-height: 518px;
+        background: #fff;
+        border: 1px solid #bfc4c9;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+      }
+      .igm-header {
+        height: 54px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 12px 6px 10px;
+      }
+      .igm-header-left {
+        display: flex;
+        align-items: center;
+        min-width: 0;
+      }
+      .igm-avatar {
+        width: 31px;
+        height: 31px;
+        border-radius: 50%;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        background: #fbf5f1;
+        color: #9c745e;
+        font-family: Georgia, serif;
+        font-size: 8px;
+        display: grid;
+        place-items: center;
+        flex: none;
+      }
+      .igm-meta {
+        margin-left: 8px;
+        min-width: 0;
+      }
+      .igm-username {
+        font-size: 12px;
+        line-height: 15px;
+        font-weight: 600;
+        color: #111;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+      }
+      .igm-verified {
+        display: block;
+        width: 14px;
+        height: 14px;
+        object-fit: contain;
+        flex: none;
+        transform: translateY(0.25px);
+      }
+      .igm-sponsored {
+        font-size: 11px;
+        line-height: 14px;
+        color: #111;
+      }
+      .igm-more {
+        width: 24px;
+        height: 24px;
+        border: 0;
+        background: transparent;
+        color: #262626;
+        padding: 0;
+        display: grid;
+        place-items: center;
+      }
+      .igm-more svg {
+        width: 18px;
+        height: 18px;
+        display: block;
+        fill: currentColor;
+      }
+      .igm-carousel-viewport {
+        position: relative;
+        width: 100%;
+        height: var(--igm-image-height, 360px);
+        overflow: hidden;
+      }
+      .igm-carousel-track {
+        display: flex;
+        gap: 0;
+        transition: transform 0.25s cubic-bezier(0.17, 0.17, 0, 1);
+      }
+      .igm-slide {
+        flex: 0 0 320px;
+        width: 320px;
+        background: #fff;
+      }
+      .igm-image {
+        display: block;
+        width: 320px;
+        height: var(--igm-image-height, 360px);
+        object-fit: contain;
+        object-position: center;
+        background: #fff;
+      }
+      .igm-shop-frame-button {
+        width: 100%;
+        height: 44px;
+        border: 0;
+        border-top: 1px solid #dbdbdb;
+        border-bottom: 1px solid #dbdbdb;
+        background: #fff;
+        padding: 0 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: #111;
+        cursor: pointer;
+      }
+      .igm-shop-frame-button span:first-child {
+        font-size: 13px;
+        line-height: 16px;
+        font-weight: 600;
+      }
+      .igm-shop-arrow {
+        font-size: 28px;
+        line-height: 1;
+        transform: translateY(-1px);
+      }
+      .igm-prev,
+      .igm-next {
+        position: absolute;
+        top: 164px;
+        width: 18px;
+        height: 32px;
+        border: 0;
+        background: transparent;
+        padding: 0;
+        display: grid;
+        place-items: center;
+        z-index: 4;
+      }
+      .igm-prev {
+        left: 12px;
+      }
+      .igm-next {
+        right: 12px;
+      }
+      .igm-prev[hidden],
+      .igm-next[hidden] {
+        display: none;
+      }
+      .igm-prev img,
+      .igm-next img {
+        display: block;
+        width: 18px;
+        height: 32px;
+        object-fit: contain;
+        pointer-events: none;
+      }
+      .igm-dots {
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 4px 0 6px;
+      }
+      .igm-dots-viewport {
+        width: 26px;
+        overflow: hidden;
+      }
+      .igm-dots-track {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        transition: transform 0.25s cubic-bezier(0.17, 0.17, 0, 1);
+      }
+      .igm-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #d0d0d0;
+        flex: none;
+      }
+      .igm-dot.is-active {
+        background: #b3b3b3;
+      }
+      .igm-actions {
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 12px;
+        margin-bottom: 6px;
+      }
+      .igm-actions-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .igm-action {
+        width: 28px;
+        height: 28px;
+        border: 0;
+        background: transparent;
+        padding: 0;
+        display: grid;
+        place-items: center;
+        color: #111;
+      }
+      .igm-action-icon {
+        display: block;
+        width: 24px;
+        height: 24px;
+        color: #111;
+        pointer-events: none;
+      }
+      .igm-action-icon path,
+      .igm-action-icon line,
+      .igm-action-icon polygon {
+        vector-effect: non-scaling-stroke;
+      }
+      .igm-caption-user {
+        font-weight: 600;
+      }
+
+      .toolbar-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+      }
+      .advertiser-select {
+        min-width: 150px;
+        max-width: 220px;
+      }
+      .csv-status {
+        display: none;
+      }
+      .csv-status.is-error {
+        color: #b42318;
+      }
+      .fbm-avatar,
+      .igm-avatar {
+        overflow: hidden;
+        background: #fff;
+      }
+      .fbm-avatar img,
+      .igm-avatar img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .fbm-copy-block {
+        padding: 0 8px 8px;
+      }
+      .fbm-message {
+        padding: 0;
+        font-size: 14px;
+        line-height: 18px;
+        font-weight: 500;
+      }
+      .fbm-see-more,
+      .igm-see-more {
+        border: 0;
+        background: transparent;
+        padding: 0 0 0 4px;
+        color: #111;
+        font-size: 13px;
+        line-height: inherit;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline;
+        vertical-align: baseline;
+      }
+      .igm-caption {
+        padding: 0 12px 10px;
+        font-size: 12px;
+        line-height: 16px;
+        color: #111;
+      }
+      .igm-caption-text {
+        margin-left: 4px;
+      }
+      .igm-see-more {
+        margin-left: 0;
+        font-size: 12px;
+        line-height: 15px;
+      }
+
+      .fbm-see-more[hidden],
+      .igm-see-more[hidden] {
+        display: none !important;
+      }
+
+      .export-menu-wrap {
+        position: relative;
+        flex: none;
+      }
+      .export-frame-menu {
+        position: absolute;
+        top: 44px;
+        right: 0;
+        z-index: 100;
+        width: 296px;
+        padding: 14px;
+        border: 1px solid #d8dce1;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow:
+          0 12px 32px rgba(0, 0, 0, 0.16),
+          0 2px 8px rgba(0, 0, 0, 0.08);
+        transform-origin: top right;
+        animation: exportMenuIn 0.16s ease-out;
+      }
+      .export-frame-menu[hidden] {
+        display: none !important;
+      }
+      @keyframes exportMenuIn {
+        from {
+          opacity: 0;
+          transform: translateY(-5px) scale(0.98);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+      .export-frame-menu::before {
+        content: '';
+        position: absolute;
+        top: -6px;
+        right: 22px;
+        width: 10px;
+        height: 10px;
+        border-top: 1px solid #d8dce1;
+        border-left: 1px solid #d8dce1;
+        background: #fff;
+        transform: rotate(45deg);
+      }
+      .export-menu-header {
+        padding: 2px 2px 12px;
+      }
+      .export-menu-title {
+        font-size: 15px;
+        line-height: 20px;
+        font-weight: 700;
+        color: #080809;
+      }
+      .export-menu-subtitle {
+        margin-top: 2px;
+        font-size: 12px;
+        line-height: 16px;
+        color: #65686c;
+      }
+      .export-frame-options {
+        display: grid;
+        gap: 6px;
+      }
+      .export-frame-option {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        min-height: 54px;
+        padding: 9px 10px;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        cursor: pointer;
+        transition:
+          background 0.15s ease,
+          border-color 0.15s ease;
+      }
+      .export-frame-option:hover {
+        background: #f5f6f7;
+      }
+      .export-frame-option:has(input:focus-visible) {
+        outline: 2px solid #0866ff;
+        outline-offset: 1px;
+      }
+      .export-frame-option:has(input:checked) {
+        border-color: #d9e6ff;
+        background: #f4f8ff;
+      }
+      .export-frame-option input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .export-checkbox-ui {
+        width: 20px;
+        height: 20px;
+        flex: none;
+        display: grid;
+        place-items: center;
+        border: 1.5px solid #8a8d91;
+        border-radius: 5px;
+        background: #fff;
+        transition:
+          background 0.15s ease,
+          border-color 0.15s ease;
+      }
+      .export-checkbox-ui::after {
+        content: '';
+        width: 8px;
+        height: 4px;
+        border-left: 2px solid #fff;
+        border-bottom: 2px solid #fff;
+        transform: rotate(-45deg) translateY(-1px);
+        opacity: 0;
+      }
+      .export-frame-option input:checked + .export-checkbox-ui {
+        border-color: #0866ff;
+        background: #0866ff;
+      }
+      .export-frame-option input:checked + .export-checkbox-ui::after {
+        opacity: 1;
+      }
+      .export-option-copy {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .export-option-title {
+        font-size: 13px;
+        line-height: 17px;
+        font-weight: 600;
+        color: #080809;
+      }
+      .export-option-size {
+        margin-top: 1px;
+        font-size: 11px;
+        line-height: 15px;
+        color: #65686c;
+      }
+      .export-confirm-button {
+        width: 100%;
+        height: 38px;
+        margin-top: 12px;
+        border: 0;
+        border-radius: 8px;
+        background: #0866ff;
+        color: #fff;
+        font-size: 14px;
+        line-height: 38px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.15s ease;
+      }
+      .export-confirm-button:hover {
+        background: #075ce5;
+      }
+      .export-confirm-button:active {
+        background: #064fc4;
+      }
+      .export-confirm-button:focus-visible {
+        outline: 2px solid #0866ff;
+        outline-offset: 2px;
+      }
+      @media (max-width: 520px) {
+        .export-frame-menu {
+          position: fixed;
+          top: 72px;
+          right: 12px;
+          left: 12px;
+          width: auto;
+        }
+        .export-frame-menu::before {
+          display: none;
+        }
+      }
+
+      .export-confirm-button:disabled {
+        opacity: 0.72;
+        cursor: wait;
+      }
+
+      .export-progress-panel {
+        position: fixed;
+        left: 50%;
+        bottom: 14px;
+        transform: translateX(-50%);
+        z-index: 500;
+        width: min(980px, calc(100% - 24px));
+        margin: 0;
+        padding: 12px 16px;
+        border: 1px solid #d8dce1;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.98);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14);
+        backdrop-filter: saturate(140%) blur(8px);
+      }
+      .export-progress-panel[hidden] {
+        display: block !important;
+      }
+      .export-progress-panel.is-idle .export-progress-track,
+      .export-progress-panel.is-idle .export-progress-percent {
+        display: none;
+      }
+      .export-progress-detail:empty {
+        display: none;
+      }
+      .export-progress-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .export-progress-title {
+        font-size: 14px;
+        line-height: 18px;
+        font-weight: 700;
+        color: #080809;
+      }
+      .export-progress-detail {
+        margin-top: 3px;
+        font-size: 12px;
+        line-height: 16px;
+        color: #65686c;
+      }
+      .export-progress-percent {
+        flex: none;
+        min-width: 38px;
+        text-align: right;
+        font-size: 13px;
+        line-height: 18px;
+        font-weight: 700;
+        color: #0866ff;
+      }
+      .export-progress-track {
+        position: relative;
+        height: 8px;
+        margin-top: 12px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: #e4e6eb;
+      }
+      .export-progress-fill {
+        width: 0%;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #0866ff, #4b8dff);
+        transition: width 0.22s ease;
+      }
+      .export-progress-panel.is-complete .export-progress-fill {
+        background: linear-gradient(90deg, #1f9d55, #54c778);
+      }
+      .export-progress-panel.is-error .export-progress-fill {
+        background: #d92d20;
+      }
+
+      /* Polished feed and advertiser dropdowns */
+      .custom-select-wrap::after {
+        display: none !important;
+      }
+      .native-select {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+      .custom-select-button {
+        position: relative;
+        min-width: 214px;
+        height: 48px;
+        padding: 7px 40px 7px 12px;
+        border: 1px solid #d8dce1;
+        border-radius: 11px;
+        background: #fff;
+        color: #080809;
+        display: flex;
+        align-items: center;
+        text-align: left;
+        cursor: pointer;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        transition:
+          border-color 0.15s ease,
+          box-shadow 0.15s ease,
+          background 0.15s ease;
+      }
+      .custom-select-button:hover {
+        background: #f8f9fa;
+        border-color: #c8ccd1;
+      }
+      .custom-select-button:focus-visible,
+      .custom-select-wrap.is-open .custom-select-button {
+        outline: none;
+        border-color: #0866ff;
+        box-shadow: 0 0 0 3px rgba(8, 102, 255, 0.14);
+      }
+      .custom-select-button-copy {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .custom-select-label {
+        font-size: 10px;
+        line-height: 13px;
+        font-weight: 500;
+        color: #65686c;
+      }
+      .custom-select-value {
+        margin-top: 1px;
+        max-width: 170px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 13px;
+        line-height: 17px;
+        font-weight: 700;
+        color: #080809;
+      }
+      .custom-select-chevron {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        width: 8px;
+        height: 8px;
+        border-right: 2px solid #65686c;
+        border-bottom: 2px solid #65686c;
+        transform: translateY(-68%) rotate(45deg);
+        transition: transform 0.15s ease;
+      }
+      .custom-select-wrap.is-open .custom-select-chevron {
+        transform: translateY(-32%) rotate(225deg);
+      }
+      .custom-select-menu {
+        position: absolute;
+        top: 56px;
+        left: 0;
+        z-index: 120;
+        width: 286px;
+        padding: 8px;
+        border: 1px solid #d8dce1;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow:
+          0 12px 32px rgba(0, 0, 0, 0.16),
+          0 2px 8px rgba(0, 0, 0, 0.08);
+        animation: customSelectIn 0.16s ease-out;
+      }
+      .custom-select-menu[hidden] {
+        display: none !important;
+      }
+      .custom-select-menu::before {
+        content: '';
+        position: absolute;
+        top: -6px;
+        left: 24px;
+        width: 10px;
+        height: 10px;
+        border-top: 1px solid #d8dce1;
+        border-left: 1px solid #d8dce1;
+        background: #fff;
+        transform: rotate(45deg);
+      }
+      @keyframes customSelectIn {
+        from {
+          opacity: 0;
+          transform: translateY(-5px) scale(0.98);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+      .custom-select-option {
+        width: 100%;
+        min-height: 52px;
+        padding: 8px 12px;
+        border: 0;
+        border-radius: 9px;
+        background: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        text-align: left;
+        cursor: pointer;
+        transition: background 0.14s ease;
+      }
+      .custom-select-option:hover {
+        background: #f5f6f7;
+      }
+      .custom-select-option.is-selected {
+        background: #eef4ff;
+      }
+      .custom-select-option-copy {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .custom-select-option-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 13px;
+        line-height: 17px;
+        font-weight: 700;
+        color: #080809;
+      }
+      .custom-select-option-subtitle {
+        margin-top: 1px;
+        font-size: 11px;
+        line-height: 15px;
+        color: #65686c;
+      }
+      .custom-select-selected-mark {
+        flex: none;
+        color: #0866ff;
+        font-size: 15px;
+        line-height: 1;
+        font-weight: 700;
+        opacity: 0;
+      }
+      .custom-select-option.is-selected .custom-select-selected-mark {
+        opacity: 1;
+      }
+      .advertiser-select-wrap .custom-select-button {
+        min-width: 190px;
+      }
+      .advertiser-select-wrap .custom-select-menu {
+        width: 260px;
+        max-height: 260px;
+        overflow: auto;
+      }
+      @media (max-width: 960px) {
+        .preview-workspace {
+          flex-direction: column;
+          align-items: center;
+        }
+        .control-sidebar {
+          width: min(682px, 100%);
+          position: static;
+        }
+      }
+      @media (max-width: 760px) {
+        .toolbar-left {
+          flex-wrap: wrap;
+        }
+        .custom-select-button {
+          min-width: 180px;
+        }
+        .control-sidebar {
+          width: 100%;
+        }
+      }
+
+      .post-copy:has(.copy-line-text:empty) {
+        padding-bottom: 8px;
+      }
+
+      .advertiser-nav {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .advertiser-nav[hidden] {
+        display: none !important;
+      }
+      .advertiser-nav-button {
+        position: relative;
+        width: 42px;
+        height: 42px;
+        border: 1px solid #d8dce1;
+        border-radius: 10px;
+        background: #fff;
+        color: #65686c;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        transition:
+          background 0.15s ease,
+          border-color 0.15s ease,
+          color 0.15s ease,
+          transform 0.12s ease;
+      }
+      .advertiser-nav-button:hover {
+        background: #f5f6f7;
+        border-color: #c8ccd1;
+        color: #080809;
+      }
+      .advertiser-nav-button:active {
+        transform: scale(0.96);
+      }
+      .advertiser-nav-button:focus-visible {
+        outline: 2px solid #0866ff;
+        outline-offset: 2px;
+      }
+      .advertiser-nav-button:disabled {
+        opacity: 0.42;
+        cursor: not-allowed;
+        transform: none;
+      }
+      .advertiser-nav-button svg {
+        width: 20px;
+        height: 20px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .advertiser-nav-button::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        left: 50%;
+        top: calc(100% + 9px);
+        transform: translateX(-50%) translateY(-3px);
+        z-index: 180;
+        padding: 6px 8px;
+        border-radius: 7px;
+        background: #1c1e21;
+        color: #fff;
+        font-size: 11px;
+        line-height: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition:
+          opacity 0.14s ease,
+          transform 0.14s ease,
+          visibility 0.14s ease;
+      }
+      .advertiser-nav-button::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: calc(100% + 4px);
+        transform: translateX(-50%);
+        border: 5px solid transparent;
+        border-bottom-color: #1c1e21;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition:
+          opacity 0.14s ease,
+          visibility 0.14s ease;
+      }
+      .advertiser-nav-button:hover::after,
+      .advertiser-nav-button:focus-visible::after,
+      .advertiser-nav-button:hover::before,
+      .advertiser-nav-button:focus-visible::before {
+        opacity: 1;
+        visibility: visible;
+      }
+      .advertiser-nav-button:hover::after,
+      .advertiser-nav-button:focus-visible::after {
+        transform: translateX(-50%) translateY(0);
+      }
+
+      .verified-toggle {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        height: 42px;
+        padding: 0 12px 0 10px;
+        border: 1px solid #d8dce1;
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        cursor: pointer;
+        user-select: none;
+        transition:
+          border-color 0.15s ease,
+          box-shadow 0.15s ease,
+          background 0.15s ease;
+      }
+      .verified-toggle:hover {
+        background: #f8f9fa;
+        border-color: #c8ccd1;
+      }
+      .verified-toggle:focus-within {
+        border-color: #0866ff;
+        box-shadow: 0 0 0 3px rgba(8, 102, 255, 0.14);
+      }
+      .verified-toggle input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .verified-toggle-box {
+        width: 18px;
+        height: 18px;
+        border: 1.5px solid #b0b3b8;
+        border-radius: 5px;
+        background: #fff;
+        display: grid;
+        place-items: center;
+        transition:
+          border-color 0.15s ease,
+          background 0.15s ease;
+      }
+      .verified-toggle-box svg {
+        width: 12px;
+        height: 12px;
+        fill: none;
+        stroke: #fff;
+        stroke-width: 2.2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        opacity: 0;
+        transition: opacity 0.15s ease;
+      }
+      .verified-toggle input:checked + .verified-toggle-box {
+        background: #0866ff;
+        border-color: #0866ff;
+      }
+      .verified-toggle input:checked + .verified-toggle-box svg {
+        opacity: 1;
+      }
+      .verified-toggle-text {
+        font-size: 13px;
+        line-height: 17px;
+        font-weight: 600;
+        color: #080809;
+      }
+      .verified-toggle::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        left: 50%;
+        top: calc(100% + 9px);
+        transform: translateX(-50%) translateY(-3px);
+        z-index: 180;
+        padding: 6px 8px;
+        border-radius: 7px;
+        background: #1c1e21;
+        color: #fff;
+        font-size: 11px;
+        line-height: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition:
+          opacity 0.14s ease,
+          transform 0.14s ease,
+          visibility 0.14s ease;
+      }
+      .verified-toggle::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: calc(100% + 4px);
+        transform: translateX(-50%);
+        border: 5px solid transparent;
+        border-bottom-color: #1c1e21;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition:
+          opacity 0.14s ease,
+          visibility 0.14s ease;
+      }
+      .verified-toggle:hover::after,
+      .verified-toggle:hover::before,
+      .verified-toggle:focus-within::after,
+      .verified-toggle:focus-within::before {
+        opacity: 1;
+        visibility: visible;
+      }
+      .verified-toggle:hover::after,
+      .verified-toggle:focus-within::after {
+        transform: translateX(-50%) translateY(0);
+      }
+      .fbm-page-name {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .fbm-verified {
+        display: block;
+        width: 14px;
+        height: 14px;
+        object-fit: contain;
+        flex: none;
+        transform: translateY(0.25px);
+      }
+      .igm-verified {
+        display: block;
+        width: 14px;
+        height: 14px;
+        object-fit: contain;
+        flex: none;
+        transform: translateY(0.25px);
+      }
+
+      .verified-toggle-sidebar {
+        width: 100%;
+        margin-top: 10px;
+        justify-content: flex-start;
+      }
+      .carousel-viewport.is-end {
+        width: 668px;
+        margin-left: 0;
+        margin-right: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="canvas">
+      <div class="frame-toolbar">
+        <div class="toolbar-left">
+          <div
+            class="frame-select-wrap custom-select-wrap"
+            data-custom-select="frame"
+          >
+            <select
+              class="frame-select native-select"
+              id="frameSelect"
+              aria-label="Select preview frame"
+            >
+              <option value="facebook-desktop-feed" selected>
+                Facebook Desktop Feed
+              </option>
+              <option value="facebook-mobile-feed">Facebook Mobile Feed</option>
+              <option value="instagram-mobile-feed">
+                Instagram Mobile Feed
+              </option>
+            </select>
+            <button
+              class="custom-select-button"
+              type="button"
+              aria-haspopup="listbox"
+              aria-expanded="false"
+            >
+              <span class="custom-select-button-copy">
+                <span class="custom-select-label">Preview format</span>
+                <span class="custom-select-value">Facebook Desktop Feed</span>
+              </span>
+              <span class="custom-select-chevron" aria-hidden="true"></span>
+            </button>
+            <div class="custom-select-menu" role="listbox" hidden></div>
+          </div>
+
+          <div
+            class="frame-select-wrap advertiser-select-wrap custom-select-wrap"
+            data-custom-select="advertiser"
+            hidden
+          >
+            <select
+              class="frame-select advertiser-select native-select"
+              id="advertiserSelect"
+              aria-label="Select advertiser"
+            ></select>
+            <button
+              class="custom-select-button"
+              type="button"
+              aria-haspopup="listbox"
+              aria-expanded="false"
+            >
+              <span class="custom-select-button-copy">
+                <span class="custom-select-label">Advertiser</span>
+                <span class="custom-select-value">Select advertiser</span>
+              </span>
+              <span class="custom-select-chevron" aria-hidden="true"></span>
+            </button>
+            <div class="custom-select-menu" role="listbox" hidden></div>
+          </div>
+
+          <div class="advertiser-nav" id="advertiserNav" hidden>
+            <button
+              class="advertiser-nav-button"
+              id="previousAdvertiser"
+              type="button"
+              aria-label="Previous advertiser"
+              data-tooltip="Previous advertiser"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            </button>
+
+            <button
+              class="advertiser-nav-button"
+              id="nextAdvertiser"
+              type="button"
+              aria-label="Next advertiser"
+              data-tooltip="Next advertiser"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m9 6 6 6-6 6" />
+              </svg>
+            </button>
+          </div>
+
+          <span class="csv-status" id="csvStatus">Loading CSV…</span>
+        </div>
+      </div>
+      <div class="preview-workspace">
+        <div class="preview-stage">
+          <section class="frame-panel" data-frame="facebook-desktop-feed">
+            <article class="facebook-ad" id="facebookAd">
+              <header class="post-header">
+                <img
+                  class="avatar"
+                  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAmCAYAAACoPemuAAAEf0lEQVR4nO2YTWgTaxSGny8z08kYk0kDhdaOK6Gija60Loo/1SK6sW7btQrZKELpSty4cVNBFy7agEvBXbsRVyJdtPj/AyIORgpRg7YQjLammrx3oQl6q97Ge7VZ3BfexQzDOQ/fme/MfMdIEg1qamqKGzducPv2bZ4+fcrLly8plUoAxONx1q1bR1dXF9u2bWP37t3s3Lmz0RSgFSoMQ42MjCgIAgENOQgCjYyMKAzDlabTP4IVCgVlMpmGYX7kTCajQqHw78Cy2ax83//PoGr2fV/ZbPbXwP7LVfrZ6jUENjAw8Nuhah4YGFgZ2J+E+hncN2B/onwrLWsdLJvNrhpUzV9vCKTPLeF37L5G7ft+vZWw2iX8UUkJw3DVYf7uMAwVGR8fp9k0Pj4Ov/Lt+90OgkDmy0XTKbLaAD+S7TgOHz9+BKCnp4dSqUQikaCjo4NisUh7ezu3bt3i2bNnGGMwxlCtVpcFsiwLgEqlguu6GGNYWlqiWq1ijCEWixGNRpmbm2P79u20tbXx/PlzwjBk7969xONxJicnkcSnT5/AsiwBisfjGh0d1YkTJ5TJZPTq1StJ0vz8vE6dOiVAkUhEvu+rtbVVnufJdV0ZY9Ta2ipALS0tSiQSqsV0XVeABgcHlcvltGHDBtm2rdHRUUnSxYsXtX//fn348EG5XE6xWEyALMuSbds2tm1TKpXI5XJEIhFyuRzHjh3DsixmZmYoFArEYjHOnTtHOp2mUCgwOzvLnj17ePv2LZs2bWJ4eJgDBw7Q19fHkydPuHPnDoODgzx+/Jj+/n4kcfr0aTKZDGvXruX9+/ek02kWFhZwXZe2tjYqlUp91akRAtqxY4e6u7uVTqdljKnf931fnudpbGxMDx480LVr13TmzBlJ0r59+3T58mVVq1W9efNGGzdu1PXr11UsFrWwsKBDhw7p5MmTkqStW7cK0KVLlxSGoaamppTP5zUxMaF8Pq9EIqFIJPK5OsYYKpUKjuOwa9cujh8/zvnz55menqavrw/XdZHE4uIiDx8+ZHp6mlQqxfDwMIuLi/T09LB582bK5TLJZJItW7bQ0dGB4zh4nsfk5CSzs7MApFIpALq7u6lUKrx7947Ozk7m5ubo7OzE8zyq1SrRaBTb87x64vn5eXp7eymXy/USvX79mnw+j2VZtLS0EI/HefToEVeuXOHs2bP09/fz4sULDh48yOHDhzl69CgTExNcvXqVI0eOkEqluHv3LmNjY/T29nL//n0uXLhAOp3m5s2b3Lt3j5mZGZaWligWiwCUy+XPpVyzZk29udm2/d2mZ4xRNBoVIM/z1NXVpWKxqPXr1wtQe3t7PU7tpa9tCL40zdqr8T07jvPtva8fNsbItu36Q7WdVwP2PK+ezHEcJZNJxWIxGWPqMSzLUjKZXAbhOE4dPB6Py3VdpVIpAUomk/V8tfj/d/5GFQmCYLUZlikIAiJDQ0OrzbFMQ0NDNO2PYvP+Wjf1YaRpj29NfeCtqSlHBKsBt+Khyp8sa8NjqJqacnBX02qNOv8CQDlxr2uc2DIAAAAASUVORK5CYII="
+                  alt="Sport M"
+                />
+                <div class="page-meta">
+                  <div class="page-name">
+                    Sport M
+                    <img
+                      class="verified"
+                      src="https://static.xx.fbcdn.net/assets/?set=content_operations_help_center&name=fb-verifiedbadge-iphone&density=1"
+                      alt=""
+                      aria-hidden="true"
+                      draggable="false"
+                    />
+                  </div>
+                  <div class="sponsored">
+                    Ad <span>·</span>
+                    <img
+                      class="privacy-globe-icon"
+                      src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAABtUlEQVR4nGWR70sTcRzHX3d090DdTjNm7W74qHyUPTBlihb6QIrot0R/ggSCKCGICYUhFfhIECGIoCchUuEDCcOo1OlWa1GI080g6cfObeKV24Ox+/pgeqW9n75/fvhIQgjBDuaDISKRT/z+s4Wdz6OqCidramhqbNiVIAkhhGVZPHr8BJ/PoKX5NKWaBsDUq2nGxp9R4fFws7sTt9uFDDAy+pC2q5e5cumCI44urzD9+g0ACdPk3oMhAOSZ2TkURUX3HimQCRPbtlmKLpNKp50pyVSKyZdTHJgNLFB17CgA33/85M7AIIfKy9FKNf6FEIKFYAjZ2rQIhz+yuvqVwxUeujo70HUvsVic/chms0g9vbdEOr1R2CfLDNzuR9Pc/EokMHSdp2Pjzi0Hy8qQS4pLnATbtonF4yiKgs8wkCSJ69faOHumFYCi4iLkluZTe2o/f1n8b0omk0VVVS6eP4fcUO9H93odMvT+A3cH7/P8xYTTGo5EMAydE9XH/z5ueGSUdTPJVibjmPt6e3j7boZva2t03GjH5XIVDLuCwHyQuUAA00ySy+WorPRRV1tLvb/OCdkG86usolnucwIAAAAASUVORK5CYII="
+                      alt=""
+                      aria-hidden="true"
+                    />
+                  </div>
+                </div>
+                <div class="header-actions">
+                  <button class="plain-icon more">
+                    <svg viewBox="0 0 24 24">
+                      <circle cx="5" cy="12" r="2" />
+                      <circle cx="12" cy="12" r="2" />
+                      <circle cx="19" cy="12" r="2" />
+                    </svg>
+                  </button>
+                  <button class="plain-icon close">
+                    <svg viewBox="0 0 24 24">
+                      <path d="m6 6 12 12M18 6 6 18" />
+                    </svg>
+                  </button>
+                </div>
+              </header>
+
+              <section class="post-copy">
+                <div class="copy-line">
+                  <span class="copy-line-text"
+                    >Летните попусти продолжуваат - побрзај и искористи ја оваа
+                    можност. 50% попуст на СЕ!...</span
+                  >
+                  <button class="see-more" type="button" hidden>
+                    See more
+                  </button>
+                </div>
+              </section>
+
+              <section class="carousel-viewport">
+                <div class="carousel-track" id="carouselTrack">
+                  <article class="product-card">
+                    <img
+                      class="ad-creative"
+                      src="https://b2.myadfinder.com/posts/1462782052555333/imageUrl.jpeg"
+                      alt="Advertisement creative"
+                    />
+                    <div class="product-footer">
+                      <div class="footer-copy">
+                        Adidas Barreda<br />Demo slide 1
+                      </div>
+                      <button class="shop-button">Shop 1</button>
+                    </div>
+                  </article>
+                  <article class="product-card">
+                    <img
+                      class="ad-creative"
+                      src="https://b2.myadfinder.com/posts/1462782052555333/imageUrl.jpeg"
+                      alt="Advertisement creative"
+                    />
+                    <div class="product-footer">
+                      <div class="footer-copy">
+                        Nike Court Vision<br />Demo slide 2
+                      </div>
+                      <button class="shop-button">Shop 2</button>
+                    </div>
+                  </article>
+                  <article class="product-card">
+                    <img
+                      class="ad-creative"
+                      src="https://b2.myadfinder.com/posts/1462782052555333/imageUrl.jpeg"
+                      alt="Advertisement creative"
+                    />
+                    <div class="product-footer">
+                      <div class="footer-copy">
+                        Summer Runner<br />Demo slide 3
+                      </div>
+                      <button class="shop-button">Shop 3</button>
+                    </div>
+                  </article>
+                  <article class="product-card">
+                    <img
+                      class="ad-creative"
+                      src="https://b2.myadfinder.com/posts/1462782052555333/imageUrl.jpeg"
+                      alt="Advertisement creative"
+                    />
+                    <div class="product-footer">
+                      <div class="footer-copy">
+                        Urban Classic<br />Demo slide 4
+                      </div>
+                      <button class="shop-button">Shop 4</button>
+                    </div>
+                  </article>
+                  <article class="product-card">
+                    <img
+                      class="ad-creative"
+                      src="https://b2.myadfinder.com/posts/1462782052555333/imageUrl.jpeg"
+                      alt="Advertisement creative"
+                    />
+                    <div class="product-footer">
+                      <div class="footer-copy">
+                        Cloud Sneaker<br />Demo slide 5
+                      </div>
+                      <button class="shop-button">Shop 5</button>
+                    </div>
+                  </article>
+                  <article class="product-card">
+                    <img
+                      class="ad-creative"
+                      src="https://b2.myadfinder.com/posts/1462782052555333/imageUrl.jpeg"
+                      alt="Advertisement creative"
+                    />
+                    <div class="product-footer">
+                      <div class="footer-copy">
+                        Street Low<br />Demo slide 6
+                      </div>
+                      <button class="shop-button">Shop 6</button>
+                    </div>
+                  </article>
+                  <article class="product-card">
+                    <img
+                      class="ad-creative"
+                      src="https://b2.myadfinder.com/posts/1462782052555333/imageUrl.jpeg"
+                      alt="Advertisement creative"
+                    />
+                    <div class="product-footer">
+                      <div class="footer-copy">
+                        Retro Court<br />Demo slide 7
+                      </div>
+                      <button class="shop-button">Shop 7</button>
+                    </div>
+                  </article>
+                  <article class="product-card">
+                    <img
+                      class="ad-creative"
+                      src="https://b2.myadfinder.com/posts/1462782052555333/imageUrl.jpeg"
+                      alt="Advertisement creative"
+                    />
+                    <div class="product-footer">
+                      <div class="footer-copy">
+                        Daily Trainer<br />Demo slide 8
+                      </div>
+                      <button class="shop-button">Shop 8</button>
+                    </div>
+                  </article>
+                  <article class="product-card">
+                    <img
+                      class="ad-creative"
+                      src="https://b2.myadfinder.com/posts/1462782052555333/imageUrl.jpeg"
+                      alt="Advertisement creative"
+                    />
+                    <div class="product-footer">
+                      <div class="footer-copy">
+                        Weekend Sneaker<br />Demo slide 9
+                      </div>
+                      <button class="shop-button">Shop 9</button>
+                    </div>
+                  </article>
+                  <article class="product-card">
+                    <img
+                      class="ad-creative"
+                      src="https://b2.myadfinder.com/posts/1462782052555333/imageUrl.jpeg"
+                      alt="Advertisement creative"
+                    />
+                    <div class="product-footer">
+                      <div class="footer-copy">
+                        Final Demo<br />Demo slide 10
+                      </div>
+                      <button class="shop-button">Shop 10</button>
+                    </div>
+                  </article>
+                </div>
+                <button
+                  class="carousel-prev"
+                  id="carouselPrev"
+                  aria-label="Previous item"
+                >
+                  <svg viewBox="0 0 24 24"><path d="m15 5-7 7 7 7" /></svg>
+                </button>
+                <button
+                  class="carousel-next"
+                  id="carouselNext"
+                  aria-label="Next item"
+                >
+                  <svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7" /></svg>
+                </button>
+              </section>
+
+              <footer class="engagement-row desktop-action-row">
+                <div class="desktop-action-group">
+                  <button
+                    class="desktop-action-button"
+                    type="button"
+                    aria-label="Like"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        d="M7.4 10.2 10.8 3c.35-.75 1.45-.5 1.45.33v5.1h5.24c1.34 0 2.33 1.25 2.02 2.55l-1.6 6.7a2.08 2.08 0 0 1-2.03 1.6H7.4m0-9.08H4.2v9.08h3.2V10.2Z"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    class="desktop-action-button"
+                    type="button"
+                    aria-label="Comment"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        d="M20 11.5c0 4.15-3.58 7.5-8 7.5a8.7 8.7 0 0 1-3.15-.58L4 20l1.38-3.85A7.2 7.2 0 0 1 4 11.5C4 7.35 7.58 4 12 4s8 3.35 8 7.5Z"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    class="desktop-action-button"
+                    type="button"
+                    aria-label="Share"
+                  >
+                    <svg
+                      class="desktop-share-icon"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M13.4 5.15 20 11.5l-6.6 6.35v-3.62c-4.35.04-7.32 1.45-9.4 4.62.67-5.55 3.87-9.01 9.4-9.43V5.15Z"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </footer>
+            </article>
+          </section>
+
+          <section class="frame-panel" data-frame="facebook-mobile-feed" hidden>
+            <article class="fb-mobile-ad" id="facebookMobileAd">
+              <header class="fbm-header">
+                <div class="fbm-avatar">HUSH</div>
+                <div class="fbm-meta">
+                  <div class="fbm-page-name">
+                    Hush
+                    <img
+                      class="fbm-verified"
+                      src="https://static.xx.fbcdn.net/assets/?set=content_operations_help_center&name=fb-verifiedbadge-iphone&density=1"
+                      alt=""
+                      aria-hidden="true"
+                      draggable="false"
+                    />
+                  </div>
+                  <div class="fbm-subline">
+                    <span>Ad</span><span>·</span
+                    ><span>Not connected to Kai Blue</span><span>·</span>
+                    <img
+                      class="fbm-globe"
+                      src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAABtUlEQVR4nGWR70sTcRzHX3d090DdTjNm7W74qHyUPTBlihb6QIrot0R/ggSCKCGICYUhFfhIECGIoCchUuEDCcOo1OlWa1GI080g6cfObeKV24Ox+/pgeqW9n75/fvhIQgjBDuaDISKRT/z+s4Wdz6OqCidramhqbNiVIAkhhGVZPHr8BJ/PoKX5NKWaBsDUq2nGxp9R4fFws7sTt9uFDDAy+pC2q5e5cumCI44urzD9+g0ACdPk3oMhAOSZ2TkURUX3HimQCRPbtlmKLpNKp50pyVSKyZdTHJgNLFB17CgA33/85M7AIIfKy9FKNf6FEIKFYAjZ2rQIhz+yuvqVwxUeujo70HUvsVic/chms0g9vbdEOr1R2CfLDNzuR9Pc/EokMHSdp2Pjzi0Hy8qQS4pLnATbtonF4yiKgs8wkCSJ69faOHumFYCi4iLkluZTe2o/f1n8b0omk0VVVS6eP4fcUO9H93odMvT+A3cH7/P8xYTTGo5EMAydE9XH/z5ueGSUdTPJVibjmPt6e3j7boZva2t03GjH5XIVDLuCwHyQuUAA00ySy+WorPRRV1tLvb/OCdkG86usolnucwIAAAAASUVORK5CYII="
+                      alt=""
+                    />
+                  </div>
+                </div>
+                <div class="fbm-actions">
+                  <button type="button" aria-label="More">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <circle cx="5" cy="12" r="1.6" />
+                      <circle cx="12" cy="12" r="1.6" />
+                      <circle cx="19" cy="12" r="1.6" />
+                    </svg>
+                  </button>
+                  <button type="button" aria-label="Close">×</button>
+                </div>
+              </header>
+
+              <div class="fbm-copy-block">
+                <span class="fbm-message"
+                  >New in: effortlessly put-together styles</span
+                ><button
+                  class="fbm-see-more"
+                  id="fbmSeeMore"
+                  type="button"
+                  hidden
+                >
+                  See more
+                </button>
+              </div>
+
+              <section class="fbm-carousel-viewport">
+                <div class="fbm-carousel-track" id="fbmTrack">
+                  <article class="fbm-card">
+                    <img
+                      class="fbm-image"
+                      src="https://b2.myadfinder.com/posts/122136062073128279/imageUrl5.jpeg"
+                      alt="Ad creative 1"
+                    />
+                    <div class="fbm-card-footer">
+                      <div class="fbm-headline">Demo product 1</div>
+                      <button type="button">Shop now</button>
+                    </div>
+                  </article>
+                  <article class="fbm-card">
+                    <img
+                      class="fbm-image"
+                      src="https://b2.myadfinder.com/posts/122136062073128279/imageUrl5.jpeg"
+                      alt="Ad creative 2"
+                    />
+                    <div class="fbm-card-footer">
+                      <div class="fbm-headline">Demo product 2</div>
+                      <button type="button">Shop now</button>
+                    </div>
+                  </article>
+                  <article class="fbm-card">
+                    <img
+                      class="fbm-image"
+                      src="https://b2.myadfinder.com/posts/122136062073128279/imageUrl5.jpeg"
+                      alt="Ad creative 3"
+                    />
+                    <div class="fbm-card-footer">
+                      <div class="fbm-headline">Demo product 3</div>
+                      <button type="button">Shop now</button>
+                    </div>
+                  </article>
+                  <article class="fbm-card">
+                    <img
+                      class="fbm-image"
+                      src="https://b2.myadfinder.com/posts/122136062073128279/imageUrl5.jpeg"
+                      alt="Ad creative 4"
+                    />
+                    <div class="fbm-card-footer">
+                      <div class="fbm-headline">Demo product 4</div>
+                      <button type="button">Shop now</button>
+                    </div>
+                  </article>
+                  <article class="fbm-card">
+                    <img
+                      class="fbm-image"
+                      src="https://b2.myadfinder.com/posts/122136062073128279/imageUrl5.jpeg"
+                      alt="Ad creative 5"
+                    />
+                    <div class="fbm-card-footer">
+                      <div class="fbm-headline">Demo product 5</div>
+                      <button type="button">Shop now</button>
+                    </div>
+                  </article>
+                  <article class="fbm-card">
+                    <img
+                      class="fbm-image"
+                      src="https://b2.myadfinder.com/posts/122136062073128279/imageUrl5.jpeg"
+                      alt="Ad creative 6"
+                    />
+                    <div class="fbm-card-footer">
+                      <div class="fbm-headline">Demo product 6</div>
+                      <button type="button">Shop now</button>
+                    </div>
+                  </article>
+                  <article class="fbm-card">
+                    <img
+                      class="fbm-image"
+                      src="https://b2.myadfinder.com/posts/122136062073128279/imageUrl5.jpeg"
+                      alt="Ad creative 7"
+                    />
+                    <div class="fbm-card-footer">
+                      <div class="fbm-headline">Demo product 7</div>
+                      <button type="button">Shop now</button>
+                    </div>
+                  </article>
+                  <article class="fbm-card">
+                    <img
+                      class="fbm-image"
+                      src="https://b2.myadfinder.com/posts/122136062073128279/imageUrl5.jpeg"
+                      alt="Ad creative 8"
+                    />
+                    <div class="fbm-card-footer">
+                      <div class="fbm-headline">Demo product 8</div>
+                      <button type="button">Shop now</button>
+                    </div>
+                  </article>
+                  <article class="fbm-card">
+                    <img
+                      class="fbm-image"
+                      src="https://b2.myadfinder.com/posts/122136062073128279/imageUrl5.jpeg"
+                      alt="Ad creative 9"
+                    />
+                    <div class="fbm-card-footer">
+                      <div class="fbm-headline">Demo product 9</div>
+                      <button type="button">Shop now</button>
+                    </div>
+                  </article>
+                  <article class="fbm-card">
+                    <img
+                      class="fbm-image"
+                      src="https://b2.myadfinder.com/posts/122136062073128279/imageUrl5.jpeg"
+                      alt="Ad creative 10"
+                    />
+                    <div class="fbm-card-footer">
+                      <div class="fbm-headline">Demo product 10</div>
+                      <button type="button">Shop now</button>
+                    </div>
+                  </article>
+                </div>
+
+                <button
+                  class="fbm-prev"
+                  id="fbmPrev"
+                  type="button"
+                  aria-label="Previous"
+                >
+                  <img
+                    src="https://business.facebook.com/images/vault/arrow_left.png"
+                    alt=""
+                  />
+                </button>
+                <button
+                  class="fbm-next"
+                  id="fbmNext"
+                  type="button"
+                  aria-label="Next"
+                >
+                  <img
+                    src="https://business.facebook.com/images/vault/arrow_right.png"
+                    alt=""
+                  />
+                </button>
+              </section>
+
+              <footer class="fbm-footer">
+                <button
+                  class="fbm-footer-action"
+                  type="button"
+                  aria-label="Like"
+                >
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      d="M7.4 10.2 10.8 3c.35-.75 1.45-.5 1.45.33v5.1h5.24c1.34 0 2.33 1.25 2.02 2.55l-1.6 6.7a2.08 2.08 0 0 1-2.03 1.6H7.4m0-9.08H4.2v9.08h3.2V10.2Z"
+                    />
+                  </svg>
+                  <span>Like</span>
+                </button>
+                <button
+                  class="fbm-footer-action"
+                  type="button"
+                  aria-label="Comment"
+                >
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      d="M20 11.5c0 4.15-3.58 7.5-8 7.5a8.7 8.7 0 0 1-3.15-.58L4 20l1.38-3.85A7.2 7.2 0 0 1 4 11.5C4 7.35 7.58 4 12 4s8 3.35 8 7.5Z"
+                    />
+                  </svg>
+                  <span>Comment</span>
+                </button>
+                <button
+                  class="fbm-footer-action"
+                  type="button"
+                  aria-label="Share"
+                >
+                  <svg
+                    class="fbm-share-icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M13.4 5.15 20 11.5l-6.6 6.35v-3.62c-4.35.04-7.32 1.45-9.4 4.62.67-5.55 3.87-9.01 9.4-9.43V5.15Z"
+                    />
+                  </svg>
+                  <span>Share</span>
+                </button>
+              </footer>
+            </article>
+          </section>
+
+          <section
+            class="frame-panel"
+            data-frame="instagram-mobile-feed"
+            hidden
+          >
+            <article class="ig-mobile-ad" id="instagramMobileAd">
+              <header class="igm-header">
+                <div class="igm-header-left">
+                  <div class="igm-avatar">HUSH</div>
+                  <div class="igm-meta">
+                    <div class="igm-username">
+                      hushofficial
+                      <img
+                        class="igm-verified"
+                        src="https://static.xx.fbcdn.net/assets/?set=content_operations_help_center&name=ig-verifiedbadge-shared&density=1"
+                        alt=""
+                        aria-hidden="true"
+                        draggable="false"
+                      />
+                    </div>
+                    <div class="igm-sponsored">Ad</div>
+                  </div>
+                </div>
+                <button
+                  class="igm-more"
+                  type="button"
+                  aria-label="More options"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="5" cy="12" r="1.5" />
+                    <circle cx="12" cy="12" r="1.5" />
+                    <circle cx="19" cy="12" r="1.5" />
+                  </svg>
+                </button>
+              </header>
+
+              <section class="igm-carousel-viewport">
+                <div class="igm-carousel-track" id="igmTrack">
+                  <article class="igm-slide">
+                    <img
+                      class="igm-image"
+                      src="https://b2.myadfinder.com/posts/122136062073128279/imageUrl5.jpeg"
+                      alt="Instagram ad creative 1"
+                    />
+                  </article>
+                  <article class="igm-slide">
+                    <img
+                      class="igm-image"
+                      src="https://b2.myadfinder.com/posts/122136062073128279/imageUrl5.jpeg"
+                      alt="Instagram ad creative 2"
+                    />
+                  </article>
+                  <article class="igm-slide">
+                    <img
+                      class="igm-image"
+                      src="https://b2.myadfinder.com/posts/122136062073128279/imageUrl5.jpeg"
+                      alt="Instagram ad creative 3"
+                    />
+                  </article>
+                  <article class="igm-slide">
+                    <img
+                      class="igm-image"
+                      src="https://b2.myadfinder.com/posts/122136062073128279/imageUrl5.jpeg"
+                      alt="Instagram ad creative 4"
+                    />
+                  </article>
+                  <article class="igm-slide">
+                    <img
+                      class="igm-image"
+                      src="https://b2.myadfinder.com/posts/122136062073128279/imageUrl5.jpeg"
+                      alt="Instagram ad creative 5"
+                    />
+                  </article>
+                  <article class="igm-slide">
+                    <img
+                      class="igm-image"
+                      src="https://b2.myadfinder.com/posts/122136062073128279/imageUrl5.jpeg"
+                      alt="Instagram ad creative 6"
+                    />
+                  </article>
+                  <article class="igm-slide">
+                    <img
+                      class="igm-image"
+                      src="https://b2.myadfinder.com/posts/122136062073128279/imageUrl5.jpeg"
+                      alt="Instagram ad creative 7"
+                    />
+                  </article>
+                  <article class="igm-slide">
+                    <img
+                      class="igm-image"
+                      src="https://b2.myadfinder.com/posts/122136062073128279/imageUrl5.jpeg"
+                      alt="Instagram ad creative 8"
+                    />
+                  </article>
+                  <article class="igm-slide">
+                    <img
+                      class="igm-image"
+                      src="https://b2.myadfinder.com/posts/122136062073128279/imageUrl5.jpeg"
+                      alt="Instagram ad creative 9"
+                    />
+                  </article>
+                  <article class="igm-slide">
+                    <img
+                      class="igm-image"
+                      src="https://b2.myadfinder.com/posts/122136062073128279/imageUrl5.jpeg"
+                      alt="Instagram ad creative 10"
+                    />
+                  </article>
+                </div>
+
+                <button
+                  class="igm-prev"
+                  id="igmPrev"
+                  type="button"
+                  aria-label="Previous"
+                >
+                  <img
+                    src="https://business.facebook.com/images/vault/arrow_left.png"
+                    alt=""
+                  />
+                </button>
+                <button
+                  class="igm-next"
+                  id="igmNext"
+                  type="button"
+                  aria-label="Next"
+                >
+                  <img
+                    src="https://business.facebook.com/images/vault/arrow_right.png"
+                    alt=""
+                  />
+                </button>
+              </section>
+
+              <button class="igm-shop-frame-button" type="button">
+                <span>Shop now</span>
+                <span class="igm-shop-arrow">›</span>
+              </button>
+
+              <div class="igm-dots" aria-label="Slide position">
+                <div class="igm-dots-viewport">
+                  <div class="igm-dots-track" id="igmDotsTrack"></div>
+                </div>
+              </div>
+
+              <div class="igm-actions">
+                <div class="igm-actions-left">
+                  <button class="igm-action igm-like-btn" aria-label="Like">
+                    <svg
+                      aria-label="Like"
+                      class="igm-action-icon igm-like-icon"
+                      fill="currentColor"
+                      height="24"
+                      role="img"
+                      viewBox="0 0 24 24"
+                      width="24"
+                    >
+                      <title>Like</title>
+                      <path
+                        d="M16.792 3.904A4.989 4.989 0 0 1 21.5 9.122c0 3.072-2.652 4.959-5.197 7.222-2.512 2.243-3.865 3.469-4.303 3.752-.477-.309-2.143-1.823-4.303-3.752C5.141 14.072 2.5 12.167 2.5 9.122a4.989 4.989 0 0 1 4.708-5.218 4.21 4.21 0 0 1 3.675 1.941c.84 1.175.98 1.763 1.12 1.763s.278-.588 1.11-1.766a4.17 4.17 0 0 1 3.679-1.938m0-2a6.04 6.04 0 0 0-4.797 2.127 6.052 6.052 0 0 0-4.787-2.127A6.985 6.985 0 0 0 .5 9.122c0 3.61 2.55 5.827 5.015 7.97.283.246.569.494.853.747l1.027.918a44.998 44.998 0 0 0 3.518 3.018 2 2 0 0 0 2.174 0 45.263 45.263 0 0 0 3.626-3.115l.922-.824c.293-.26.59-.519.885-.774 2.334-2.025 4.98-4.32 4.98-7.94a6.985 6.985 0 0 0-6.708-7.218Z"
+                      ></path>
+                    </svg>
+                  </button>
+                  <button
+                    class="igm-action igm-comment-btn"
+                    aria-label="Comment"
+                  >
+                    <svg
+                      aria-label="Comment"
+                      class="igm-action-icon igm-comment-icon"
+                      fill="currentColor"
+                      height="24"
+                      role="img"
+                      viewBox="0 0 24 24"
+                      width="24"
+                    >
+                      <title>Comment</title>
+                      <path
+                        d="M20.656 17.008a9.993 9.993 0 1 0-3.59 3.615L22 22Z"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                      ></path>
+                    </svg>
+                  </button>
+                  <button class="igm-action igm-share-btn" aria-label="Share">
+                    <svg
+                      aria-label="Share"
+                      class="igm-action-icon igm-share-icon"
+                      fill="currentColor"
+                      height="24"
+                      role="img"
+                      viewBox="0 0 24 24"
+                      width="24"
+                    >
+                      <title>Share</title>
+                      <path
+                        d="M13.973 20.046 21.77 6.928C22.8 5.195 21.55 3 19.535 3H4.466C2.138 3 .984 5.825 2.646 7.456l4.842 4.752 1.723 7.121c.548 2.266 3.571 2.721 4.762.717Z"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                      ></path>
+                      <line
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        x1="7.488"
+                        x2="15.515"
+                        y1="12.208"
+                        y2="7.641"
+                      ></line>
+                    </svg>
+                  </button>
+                </div>
+                <button class="igm-action igm-bookmark" aria-label="Save">
+                  <svg
+                    aria-label="Save"
+                    class="igm-action-icon igm-save-icon"
+                    fill="currentColor"
+                    height="24"
+                    role="img"
+                    viewBox="0 0 24 24"
+                    width="24"
+                  >
+                    <title>Save</title>
+                    <polygon
+                      fill="none"
+                      points="20 21 12 13.44 4 21 4 3 20 3 20 21"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                    ></polygon>
+                  </svg>
+                </button>
+              </div>
+
+              <div class="igm-caption">
+                <span class="igm-caption-user">hushofficial</span>
+                <span class="igm-caption-text"
+                  >New in: effortlessly put-together styles</span
+                ><button
+                  class="igm-see-more"
+                  id="igmSeeMore"
+                  type="button"
+                  hidden
+                >
+                  See more
+                </button>
+              </div>
+            </article>
+          </section>
+        </div>
+        <aside class="control-sidebar">
+          <div class="export-menu-wrap">
+            <button
+              class="export-frames"
+              id="exportFrames"
+              type="button"
+              aria-haspopup="true"
+              aria-expanded="false"
+              aria-controls="exportFrameMenu"
+            >
+              Export frame images
+            </button>
+
+            <label
+              class="verified-toggle verified-toggle-sidebar"
+              data-tooltip="Enable or disable the verified badge"
+            >
+              <input type="checkbox" id="verifiedToggle" checked />
+              <span class="verified-toggle-box" aria-hidden="true">
+                <svg viewBox="0 0 16 16" aria-hidden="true">
+                  <path d="M3.2 8.2 6.5 11.2 12.8 4.9" />
+                </svg>
+              </span>
+              <span class="verified-toggle-text">Verified</span>
+            </label>
+
+            <div class="export-frame-menu" id="exportFrameMenu" hidden>
+              <div class="export-menu-header">
+                <div class="export-menu-title">Select frames to export</div>
+                <div class="export-menu-subtitle">
+                  Choose one or more preview formats.
+                </div>
+              </div>
+
+              <div class="export-frame-options">
+                <label class="export-frame-option">
+                  <input
+                    type="checkbox"
+                    name="exportFrame"
+                    value="facebook-desktop-feed"
+                    checked
+                  />
+                  <span class="export-checkbox-ui" aria-hidden="true"></span>
+                  <span class="export-option-copy">
+                    <span class="export-option-title"
+                      >Facebook Desktop Feed</span
+                    >
+                    <span class="export-option-size">Desktop preview</span>
+                  </span>
+                </label>
+
+                <label class="export-frame-option">
+                  <input
+                    type="checkbox"
+                    name="exportFrame"
+                    value="facebook-mobile-feed"
+                    checked
+                  />
+                  <span class="export-checkbox-ui" aria-hidden="true"></span>
+                  <span class="export-option-copy">
+                    <span class="export-option-title"
+                      >Facebook Mobile Feed</span
+                    >
+                    <span class="export-option-size">320 × 438.08</span>
+                  </span>
+                </label>
+
+                <label class="export-frame-option">
+                  <input
+                    type="checkbox"
+                    name="exportFrame"
+                    value="instagram-mobile-feed"
+                    checked
+                  />
+                  <span class="export-checkbox-ui" aria-hidden="true"></span>
+                  <span class="export-option-copy">
+                    <span class="export-option-title"
+                      >Instagram Mobile Feed</span
+                    >
+                    <span class="export-option-size">320 × 518</span>
+                  </span>
+                </label>
+              </div>
+
+              <button
+                class="export-confirm-button"
+                id="exportConfirmButton"
+                type="button"
+              >
+                Export
+              </button>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <section
+        class="export-progress-panel is-idle"
+        id="exportProgressPanel"
+        aria-live="polite"
+      >
+        <div class="export-progress-header">
+          <div>
+            <div class="export-progress-title" id="exportProgressTitle">
+              Preparing export…
+            </div>
+            <div class="export-progress-detail" id="exportProgressDetail">
+              Getting everything ready.
+            </div>
+          </div>
+          <div class="export-progress-percent" id="exportProgressPercent">
+            0%
+          </div>
+        </div>
+
+        <div class="export-progress-track" aria-hidden="true">
+          <div class="export-progress-fill" id="exportProgressFill"></div>
+        </div>
+      </section>
+    </main>
+    <script>
+      const ad = document.getElementById('facebookAd');
+      const frameSelect = document.getElementById('frameSelect');
+      const exportFrames = document.getElementById('exportFrames');
+
+      const framePanels = [...document.querySelectorAll('.frame-panel')];
+
+      function switchFrame(frameValue) {
+        framePanels.forEach((panel) => {
+          panel.hidden = panel.dataset.frame !== frameValue;
+        });
+
+        if (frameValue === 'facebook-mobile-feed') {
+          requestAnimationFrame(updateFacebookMobileCarousel);
+        }
+
+        if (frameValue === 'instagram-mobile-feed') {
+          requestAnimationFrame(() => {
+            detectInstagramCreativeSize();
+            updateInstagramCarousel();
+          });
+        }
+
+        if (frameValue === 'facebook-desktop-feed') {
+          requestAnimationFrame(() => {
+            refreshDynamicFrame();
+            updateCarousel();
+            fit();
+          });
+        }
+      }
+
+      frameSelect.addEventListener('change', (event) => {
+        switchFrame(event.target.value);
+      });
+
+      const exportFrameMenu = document.getElementById('exportFrameMenu');
+      const exportConfirmButton = document.getElementById(
+        'exportConfirmButton',
+      );
+      const exportProgressPanel = document.getElementById(
+        'exportProgressPanel',
+      );
+      const exportProgressTitle = document.getElementById(
+        'exportProgressTitle',
+      );
+      const exportProgressDetail = document.getElementById(
+        'exportProgressDetail',
+      );
+      const exportProgressPercent = document.getElementById(
+        'exportProgressPercent',
+      );
+      const exportProgressFill = document.getElementById('exportProgressFill');
+
+      function setReadyStatus(detail = '') {
+        exportProgressPanel.hidden = false;
+        exportProgressPanel.classList.remove('is-complete', 'is-error');
+        exportProgressPanel.classList.add('is-idle');
+        exportProgressFill.style.width = '0%';
+        exportProgressTitle.textContent = 'Ready';
+        exportProgressDetail.textContent = detail;
+        exportProgressPercent.textContent = '';
+      }
+
+      function showExportProgress() {
+        exportProgressPanel.hidden = false;
+        exportProgressPanel.classList.remove(
+          'is-complete',
+          'is-error',
+          'is-idle',
+        );
+        updateExportProgress(
+          0,
+          'Preparing export…',
+          'Getting everything ready.',
+        );
+      }
+
+      function updateExportProgress(percent, title, detail) {
+        exportProgressPanel.classList.remove('is-idle');
+        const safePercent = Math.max(0, Math.min(100, Math.round(percent)));
+        exportProgressFill.style.width = `${safePercent}%`;
+        exportProgressPercent.textContent = `${safePercent}%`;
+        if (title) exportProgressTitle.textContent = title;
+        exportProgressDetail.textContent = detail || '';
+      }
+
+      function completeExportProgress(failedCount = 0, exportedCount = 0) {
+        exportProgressPanel.classList.remove('is-error', 'is-idle');
+        exportProgressPanel.classList.add('is-complete');
+
+        const detail = failedCount
+          ? `Your ZIP was downloaded with ${exportedCount} successful export${exportedCount === 1 ? '' : 's'}. ${failedCount} ad image export${failedCount === 1 ? '' : 's'} failed and ${failedCount === 1 ? 'was' : 'were'} skipped.`
+          : 'Your ZIP file has been downloaded.';
+
+        updateExportProgress(
+          100,
+          failedCount ? 'Export completed with warnings' : 'Export complete',
+          detail,
+        );
+        setTimeout(() => setReadyStatus(), failedCount ? 6000 : 2500);
+      }
+
+      function failExportProgress(message) {
+        exportProgressPanel.classList.remove('is-complete', 'is-idle');
+        exportProgressPanel.classList.add('is-error');
+        exportProgressFill.style.width = '100%';
+        exportProgressPercent.textContent = '!';
+        exportProgressTitle.textContent = 'Export failed';
+        exportProgressDetail.textContent =
+          message || 'Something went wrong while creating the export.';
+      }
+
+      setReadyStatus();
+
+      function setExportMenuOpen(isOpen) {
+        exportFrameMenu.hidden = !isOpen;
+        exportFrames.setAttribute('aria-expanded', String(isOpen));
+
+        if (isOpen) {
+          requestAnimationFrame(() => {
+            exportFrameMenu.querySelector('input[name="exportFrame"]')?.focus();
+          });
+        }
+      }
+
+      function waitForFramePaint(cycles = 2) {
+        return new Promise((resolve) => {
+          const step = (remaining) => {
+            if (remaining <= 0) {
+              resolve();
+              return;
+            }
+            requestAnimationFrame(() => step(remaining - 1));
+          };
+          step(cycles);
+        });
+      }
+
+      function sanitizeFileName(value) {
+        return (
+          String(value || 'export')
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '') || 'export'
+        );
+      }
+
+      function getSelectedExportFrames() {
+        return [
+          ...exportFrameMenu.querySelectorAll(
+            'input[name="exportFrame"]:checked',
+          ),
+        ].map((input) => input.value);
+      }
+
+      function getFrameElement(frameValue) {
+        if (frameValue === 'facebook-desktop-feed')
+          return document.getElementById('facebookAd');
+        if (frameValue === 'facebook-mobile-feed')
+          return document.getElementById('facebookMobileAd');
+        if (frameValue === 'instagram-mobile-feed')
+          return document.getElementById('instagramMobileAd');
+        return null;
+      }
+
+      function getFacebookMobileMaxIndex() {
+        // Export one image for every mobile carousel card. The previous
+        // calculation referenced a local `usableWidth` variable that did not
+        // exist in this scope, which stopped Facebook mobile exports before
+        // rendering began.
+        return Math.max(0, fbmTrack.querySelectorAll('.fbm-card').length - 1);
+      }
+
+      function getInstagramMaxIndex() {
+        return Math.max(0, igmTrack.querySelectorAll('.igm-slide').length - 1);
+      }
+
+      function getFrameMaxIndex(frameValue) {
+        if (frameValue === 'facebook-desktop-feed') return getMaxIndex();
+        if (frameValue === 'facebook-mobile-feed')
+          return getFacebookMobileMaxIndex();
+        if (frameValue === 'instagram-mobile-feed')
+          return getInstagramMaxIndex();
+        return 0;
+      }
+
+      async function setFramePosition(frameValue, index) {
+        if (frameValue === 'facebook-desktop-feed') {
+          currentIndex = index;
+          refreshDynamicFrame();
+          updateCarousel();
+          fit();
+        } else if (frameValue === 'facebook-mobile-feed') {
+          fbmIndex = index;
+          detectFacebookMobileCreativeSize();
+          updateFacebookMobileCarousel();
+        } else if (frameValue === 'instagram-mobile-feed') {
+          igmIndex = index;
+          detectInstagramCreativeSize();
+          updateInstagramCarousel();
+        }
+
+        await waitForFramePaint(2);
+      }
+
+      function getFrameLabel(frameValue) {
+        return (
+          {
+            'facebook-desktop-feed': 'facebook-desktop-feed',
+            'facebook-mobile-feed': 'facebook-mobile-feed',
+            'instagram-mobile-feed': 'instagram-mobile-feed',
+          }[frameValue] || frameValue
+        );
+      }
+
+      function saveBlobWithoutNavigation(blob, fileName) {
+        const objectUrl = URL.createObjectURL(blob);
+
+        // Route the download through an isolated hidden frame. If a browser
+        // ignores the download attribute for any reason, only this frame can
+        // navigate—the preview page and all of its current state stay intact.
+        const frameName = `download-sink-${Date.now()}`;
+        const downloadFrame = document.createElement('iframe');
+        downloadFrame.name = frameName;
+        downloadFrame.style.display = 'none';
+        downloadFrame.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(downloadFrame);
+
+        const link = document.createElement('a');
+        link.href = objectUrl;
+        link.download = fileName;
+        link.target = frameName;
+        link.rel = 'noopener';
+        link.style.display = 'none';
+        link.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(link);
+
+        link.click();
+
+        window.setTimeout(() => {
+          link.remove();
+          downloadFrame.remove();
+          URL.revokeObjectURL(objectUrl);
+        }, 60000);
+      }
+
+      async function downloadZipFile(fileName, files, multipleFramesSelected) {
+        const JSZip = await ensureJSZip();
+        const zip = new JSZip();
+
+        for (const entry of files) {
+          const zipPath = multipleFramesSelected
+            ? `${entry.folder}/${entry.name}`
+            : entry.name;
+
+          zip.file(zipPath, entry.blob);
+        }
+
+        const zipBlob = await zip.generateAsync({
+          type: 'blob',
+          compression: 'DEFLATE',
+          compressionOptions: { level: 6 },
+        });
+
+        saveBlobWithoutNavigation(zipBlob, fileName);
+      }
+
+      async function ensureHtml2Canvas() {
+        if (window.html2canvas) return window.html2canvas;
+
+        if (window.__html2canvasPromise) return window.__html2canvasPromise;
+
+        window.__html2canvasPromise = new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src =
+            'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+          script.onload = () => resolve(window.html2canvas);
+          script.onerror = () =>
+            reject(new Error('html2canvas could not be loaded.'));
+          document.head.appendChild(script);
+        });
+
+        return window.__html2canvasPromise;
+      }
+
+      async function ensureJSZip() {
+        if (window.JSZip) return window.JSZip;
+
+        if (window.__jszipPromise) return window.__jszipPromise;
+
+        window.__jszipPromise = new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src =
+            'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js';
+          script.onload = () => resolve(window.JSZip);
+          script.onerror = () =>
+            reject(new Error('JSZip could not be loaded.'));
+          document.head.appendChild(script);
+        });
+
+        return window.__jszipPromise;
+      }
+
+      async function waitForImages(root) {
+        const images = [...root.querySelectorAll('img')];
+        await Promise.all(
+          images.map((img) => {
+            return new Promise((resolve) => {
+              const finish = () => resolve();
+              img.addEventListener('load', finish, { once: true });
+              img.addEventListener('error', finish, { once: true });
+              if (img.complete) resolve();
+            });
+          }),
+        );
+      }
+
+      function blobToDataURL(blob) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      }
+
+      const exportImageCache = new Map();
+
+      async function runWithConcurrency(items, limit, worker) {
+        let nextIndex = 0;
+
+        async function runner() {
+          while (nextIndex < items.length) {
+            const currentIndex = nextIndex++;
+            await worker(items[currentIndex], currentIndex);
+          }
+        }
+
+        const runners = Array.from(
+          { length: Math.min(limit, items.length) },
+          () => runner(),
+        );
+
+        await Promise.all(runners);
+      }
+
+      function getCorsProxyURL(src) {
+        if (!src || src.startsWith('data:') || src.startsWith('blob:'))
+          return src;
+
+        try {
+          const url = new URL(src, window.location.href);
+
+          // wsrv.nl returns the remote image with permissive CORS headers,
+          // allowing it to be converted into a data URL before html2canvas runs.
+          if (url.hostname === 'images.weserv.nl') return url.href;
+
+          return `https://images.weserv.nl/?url=${encodeURIComponent(url.href)}&output=png`;
+        } catch {
+          return src;
+        }
+      }
+
+      async function fetchImageAsDataURL(src) {
+        if (!src) throw new Error('Image source is empty.');
+        if (src.startsWith('data:')) return src;
+
+        if (exportImageCache.has(src)) {
+          return exportImageCache.get(src);
+        }
+
+        const requestPromise = (async () => {
+          const candidates = [src, getCorsProxyURL(src)].filter(
+            (value, index, array) => value && array.indexOf(value) === index,
+          );
+
+          let lastError = null;
+
+          for (const candidate of candidates) {
+            try {
+              const response = await fetch(candidate, {
+                mode: 'cors',
+                credentials: 'omit',
+                cache: 'force-cache',
+              });
+
+              if (!response.ok) {
+                throw new Error(`Image fetch failed (${response.status})`);
+              }
+
+              const blob = await response.blob();
+
+              if (!blob.type.startsWith('image/')) {
+                throw new Error(
+                  `Unexpected response type: ${blob.type || 'unknown'}`,
+                );
+              }
+
+              return await blobToDataURL(blob);
+            } catch (error) {
+              lastError = error;
+            }
+          }
+
+          throw lastError || new Error('Image could not be fetched.');
+        })();
+
+        exportImageCache.set(src, requestPromise);
+
+        try {
+          const dataURL = await requestPromise;
+          exportImageCache.set(src, dataURL);
+          return dataURL;
+        } catch (error) {
+          exportImageCache.delete(src);
+          throw error;
+        }
+      }
+
+      async function inlineImagesForExport(root) {
+        const images = [...root.querySelectorAll('img')];
+
+        await runWithConcurrency(images, 6, async (img) => {
+          const src = img.getAttribute('src') || img.currentSrc || '';
+          if (!src || src.startsWith('data:')) return;
+
+          try {
+            const dataURL = await fetchImageAsDataURL(src);
+            img.removeAttribute('crossorigin');
+            img.src = dataURL;
+
+            await new Promise((resolve) => {
+              if (img.complete && img.naturalWidth) {
+                resolve();
+                return;
+              }
+
+              const finish = () => resolve();
+              img.addEventListener('load', finish, { once: true });
+              img.addEventListener('error', finish, { once: true });
+            });
+          } catch (error) {
+            console.warn('Could not inline export image:', src, error);
+          }
+        });
+      }
+
+      async function preloadExportImages(frameValues) {
+        const uniqueSources = new Set();
+
+        for (const frameValue of frameValues) {
+          const element = getFrameElement(frameValue);
+          if (!element) continue;
+
+          element.querySelectorAll('img').forEach((img) => {
+            const src = img.currentSrc || img.getAttribute('src') || '';
+            if (src && !src.startsWith('data:')) {
+              uniqueSources.add(src);
+            }
+          });
+        }
+
+        const sources = [...uniqueSources];
+        let completed = 0;
+
+        await runWithConcurrency(sources, 6, async (src) => {
+          try {
+            await fetchImageAsDataURL(src);
+          } catch (error) {
+            console.warn('Image preload failed:', src, error);
+          } finally {
+            completed += 1;
+            updateExportProgress(
+              3 + (completed / Math.max(1, sources.length)) * 17,
+              'Preparing images',
+              `Loaded ${completed} of ${sources.length} image assets.`,
+            );
+          }
+        });
+      }
+
+      async function exportElementAsPNG(element) {
+        const html2canvas = await ensureHtml2Canvas();
+
+        const sandbox = document.createElement('div');
+        sandbox.style.position = 'fixed';
+        sandbox.style.left = '-10000px';
+        sandbox.style.top = '0';
+        sandbox.style.padding = '24px';
+        sandbox.style.background = 'transparent';
+        sandbox.style.zIndex = '2147483647';
+        sandbox.style.opacity = '1';
+        sandbox.style.pointerEvents = 'none';
+
+        // Clear any transient hover/focus/active state before cloning. The
+        // first capture could otherwise preserve a partial rounded button
+        // background beside the Comment icon.
+        if (document.activeElement instanceof HTMLElement) {
+          document.activeElement.blur();
+        }
+
+        const elementRect = element.getBoundingClientRect();
+        const originalCreatives = [
+          ...element.querySelectorAll('.ad-creative,.fbm-image,.igm-image'),
+        ];
+
+        const clone = element.cloneNode(true);
+        clone.classList.add('export-capture');
+        clone.removeAttribute('id');
+        clone
+          .querySelectorAll('[id]')
+          .forEach((node) => node.removeAttribute('id'));
+        clone.querySelectorAll('img').forEach((img) => {
+          img.crossOrigin = 'anonymous';
+          img.decoding = 'sync';
+          img.loading = 'eager';
+        });
+
+        // Mobile carousels keep every slide in the DOM. Do not let a remote
+        // image several slides off-screen break the currently visible export.
+        // Replace only fully off-screen creative images in the clone with a
+        // transparent pixel; visible and partially visible cards remain intact.
+        const transparentPixel =
+          'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+        const clonedCreatives = [
+          ...clone.querySelectorAll('.ad-creative,.fbm-image,.igm-image'),
+        ];
+        originalCreatives.forEach((originalImg, index) => {
+          const rect = originalImg.getBoundingClientRect();
+          const intersects =
+            rect.right > elementRect.left &&
+            rect.left < elementRect.right &&
+            rect.bottom > elementRect.top &&
+            rect.top < elementRect.bottom;
+
+          if (!intersects && clonedCreatives[index]) {
+            clonedCreatives[index].src = transparentPixel;
+          }
+        });
+
+        // Export only the resting visual state of interactive controls.
+        clone
+          .querySelectorAll(
+            '.desktop-action-button, .fbm-footer-action, .igm-action',
+          )
+          .forEach((control) => {
+            control.style.background = 'transparent';
+            control.style.outline = 'none';
+            control.style.boxShadow = 'none';
+            control.style.filter = 'none';
+          });
+
+        sandbox.appendChild(clone);
+        document.body.appendChild(sandbox);
+
+        await waitForImages(sandbox);
+        await inlineImagesForExport(sandbox);
+        await waitForImages(sandbox);
+
+        const unresolvedCreatives = [
+          ...sandbox.querySelectorAll('.ad-creative,.fbm-image,.igm-image'),
+        ].filter((img) => {
+          const src = img.getAttribute('src') || '';
+          return !src.startsWith('data:') || !img.naturalWidth;
+        });
+
+        if (unresolvedCreatives.length) {
+          sandbox.remove();
+          throw new Error(
+            `${unresolvedCreatives.length} ad image${unresolvedCreatives.length === 1 ? '' : 's'} could not be prepared for export.`,
+          );
+        }
+
+        await waitForFramePaint(3);
+
+        const canvas = await html2canvas(sandbox, {
+          backgroundColor: null,
+          scale: 2.5,
+          useCORS: true,
+          allowTaint: false,
+          imageTimeout: 15000,
+          logging: false,
+        });
+
+        sandbox.remove();
+
+        const blob = await new Promise((resolve, reject) => {
+          canvas.toBlob((result) => {
+            if (result) {
+              resolve(result);
+            } else {
+              reject(new Error('PNG export could not be generated.'));
+            }
+          }, 'image/png');
+        });
+
+        return blob;
+      }
+
+      async function exportSelectedFrames() {
+        const selectedFrames = getSelectedExportFrames();
+        if (!selectedFrames.length) return;
+
+        const previousFrame = frameSelect.value;
+        const previousDesktopIndex = currentIndex;
+        const previousFacebookMobileIndex = fbmIndex;
+        const previousInstagramIndex = igmIndex;
+
+        const advertiserName =
+          (advertiserSelect && advertiserSelect.value) ||
+          document.querySelector('#facebookAd .page-name')?.textContent ||
+          'advertiser';
+
+        const baseFileName = sanitizeFileName(advertiserName);
+        const zipEntries = [];
+
+        const frameTasks = selectedFrames.map((frameValue) => ({
+          frameValue,
+          maxIndex: getFrameMaxIndex(frameValue),
+        }));
+        const totalImages = frameTasks.reduce(
+          (sum, task) => sum + task.maxIndex + 1,
+          0,
+        );
+        let completedImages = 0;
+        const failedExports = [];
+
+        exportConfirmButton.disabled = true;
+        exportConfirmButton.textContent = 'Preparing ZIP…';
+        setExportMenuOpen(false);
+        showExportProgress();
+
+        try {
+          updateExportProgress(
+            2,
+            'Preparing frames',
+            `Found ${totalImages} image${totalImages === 1 ? '' : 's'} to export.`,
+          );
+
+          await preloadExportImages(selectedFrames);
+
+          for (const task of frameTasks) {
+            const { frameValue, maxIndex } = task;
+
+            frameSelect.value = frameValue;
+            switchFrame(frameValue);
+            await waitForFramePaint(3);
+
+            const frameElement = getFrameElement(frameValue);
+            if (!frameElement) continue;
+
+            const folderName = getFrameLabel(frameValue);
+            const frameTitle = folderName
+              .split('-')
+              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(' ');
+
+            for (let index = 0; index <= maxIndex; index++) {
+              updateExportProgress(
+                20 + (completedImages / Math.max(1, totalImages)) * 68,
+                `Rendering ${frameTitle}`,
+                `Creating image ${index + 1} of ${maxIndex + 1}.`,
+              );
+
+              exportConfirmButton.textContent = `Exporting ${completedImages + 1}/${totalImages}…`;
+              await setFramePosition(frameValue, index);
+
+              try {
+                const blob = await exportElementAsPNG(frameElement);
+                const fileName = `${baseFileName}__${folderName}__${String(index + 1).padStart(2, '0')}.png`;
+
+                zipEntries.push({
+                  folder: folderName,
+                  name: fileName,
+                  blob,
+                });
+              } catch (imageError) {
+                console.error(
+                  `Skipped failed export: ${frameTitle} image ${index + 1}`,
+                  imageError,
+                );
+                failedExports.push({
+                  frame: frameTitle,
+                  index: index + 1,
+                  message: imageError?.message || 'Unknown image export error',
+                });
+              } finally {
+                completedImages += 1;
+              }
+
+              updateExportProgress(
+                20 + (completedImages / Math.max(1, totalImages)) * 68,
+                `Processed ${completedImages} of ${totalImages}`,
+                failedExports.length
+                  ? `${failedExports.length} image export${failedExports.length === 1 ? '' : 's'} failed and will be skipped.`
+                  : `Finished ${frameTitle} image ${index + 1}.`,
+              );
+
+              await new Promise((resolve) => setTimeout(resolve, 120));
+            }
+          }
+
+          if (!zipEntries.length) {
+            throw new Error(
+              'All selected ad images failed to export, so no ZIP file could be created.',
+            );
+          }
+
+          exportConfirmButton.textContent = 'Creating ZIP…';
+          updateExportProgress(
+            90,
+            'Creating ZIP file',
+            failedExports.length
+              ? `Compressing ${zipEntries.length} successful export${zipEntries.length === 1 ? '' : 's'}. ${failedExports.length} failed image${failedExports.length === 1 ? '' : 's'} will be skipped.`
+              : 'Compressing all exported images into one download.',
+          );
+
+          await downloadZipFile(
+            `${baseFileName}__frame-exports.zip`,
+            zipEntries,
+            selectedFrames.length > 1,
+          );
+
+          completeExportProgress(failedExports.length, zipEntries.length);
+
+          if (failedExports.length) {
+            const failedSummary = failedExports
+              .slice(0, 5)
+              .map((item) => `${item.frame}, image ${item.index}`)
+              .join('\n');
+            const extraCount = Math.max(0, failedExports.length - 5);
+            alert(
+              `Export completed, but ${failedExports.length} ad image export${failedExports.length === 1 ? '' : 's'} failed and ${failedExports.length === 1 ? 'was' : 'were'} skipped.\n\n${failedSummary}${extraCount ? `\n…and ${extraCount} more.` : ''}`,
+            );
+          }
+        } catch (error) {
+          if (error && error.name === 'AbortError') {
+            updateExportProgress(0, 'Export cancelled', 'No file was saved.');
+          } else {
+            console.error(error);
+            failExportProgress(error.message);
+            alert(`Export failed: ${error.message}`);
+          }
+        } finally {
+          currentIndex = previousDesktopIndex;
+          fbmIndex = previousFacebookMobileIndex;
+          igmIndex = previousInstagramIndex;
+          frameSelect.value = previousFrame;
+          switchFrame(previousFrame);
+          await waitForFramePaint(2);
+
+          if (previousFrame === 'facebook-desktop-feed') {
+            refreshDynamicFrame();
+            updateCarousel();
+            fit();
+          } else if (previousFrame === 'facebook-mobile-feed') {
+            detectFacebookMobileCreativeSize();
+            updateFacebookMobileCarousel();
+          } else if (previousFrame === 'instagram-mobile-feed') {
+            updateInstagramCarousel();
+          }
+
+          exportConfirmButton.disabled = false;
+          exportConfirmButton.textContent = 'Export';
+        }
+      }
+
+      exportFrames.addEventListener('click', (event) => {
+        event.stopPropagation();
+        setExportMenuOpen(exportFrameMenu.hidden);
+      });
+
+      exportFrameMenu.addEventListener('click', (event) => {
+        event.stopPropagation();
+      });
+
+      exportConfirmButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        exportSelectedFrames();
+      });
+
+      document.addEventListener('click', () => {
+        setExportMenuOpen(false);
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !exportFrameMenu.hidden) {
+          setExportMenuOpen(false);
+          exportFrames.focus();
+        }
+      });
+
+      switchFrame(frameSelect.value);
+      const track = document.getElementById('carouselTrack');
+      const next = document.getElementById('carouselNext');
+      const prev = document.getElementById('carouselPrev');
+      const viewport = document.querySelector('.carousel-viewport');
+
+      const cardStep = 298;
+      let currentIndex = 0;
+
+      function getMaxIndex() {
+        const maxShift = Math.max(0, track.scrollWidth - viewport.clientWidth);
+        return Math.ceil(maxShift / cardStep);
+      }
+
+      function updateCarousel() {
+        // First measure with the default scrolled / unscrolled state,
+        // then apply the final state and re-measure so the last slide
+        // gets the same outside spacing on the right as the first slide
+        // has on the left.
+        let maxIndex = getMaxIndex();
+        currentIndex = Math.max(0, Math.min(currentIndex, maxIndex));
+
+        viewport.classList.toggle('is-scrolled', currentIndex > 0);
+        viewport.classList.toggle(
+          'is-end',
+          currentIndex === maxIndex && maxIndex > 0,
+        );
+
+        // Recalculate after classes change because .is-end changes the viewport width.
+        const maxShift = Math.max(0, track.scrollWidth - viewport.clientWidth);
+        maxIndex = getMaxIndex();
+        currentIndex = Math.max(0, Math.min(currentIndex, maxIndex));
+
+        const sidePeekOffset = currentIndex === 0 ? 0 : 44;
+        const requestedShift = currentIndex * cardStep - sidePeekOffset;
+        const actualShift = Math.min(Math.max(0, requestedShift), maxShift);
+
+        viewport.classList.toggle('is-scrolled', currentIndex > 0);
+        viewport.classList.toggle(
+          'is-end',
+          currentIndex === maxIndex && maxIndex > 0,
+        );
+        track.style.transform = `translateX(-${actualShift}px)`;
+
+        // Back only appears after moving away from the first position.
+        prev.hidden = currentIndex === 0;
+        next.hidden = currentIndex === maxIndex;
+
+        prev.setAttribute('aria-disabled', String(currentIndex === 0));
+        next.setAttribute('aria-disabled', String(currentIndex === maxIndex));
+      }
+
+      next.addEventListener('click', () => {
+        if (currentIndex < getMaxIndex()) {
+          currentIndex += 1;
+          updateCarousel();
+        }
+      });
+
+      prev.addEventListener('click', () => {
+        if (currentIndex > 0) {
+          currentIndex -= 1;
+          updateCarousel();
+        }
+      });
+
+      let touchStartX = 0;
+      track.addEventListener(
+        'touchstart',
+        (event) => {
+          touchStartX = event.touches[0].clientX;
+        },
+        { passive: true },
+      );
+
+      track.addEventListener(
+        'touchend',
+        (event) => {
+          const distance = touchStartX - event.changedTouches[0].clientX;
+          if (Math.abs(distance) < 35) return;
+
+          if (distance > 0 && currentIndex < getMaxIndex()) {
+            currentIndex += 1;
+          } else if (distance < 0 && currentIndex > 0) {
+            currentIndex -= 1;
+          }
+          updateCarousel();
+        },
+        { passive: true },
+      );
+
+      const mediaFooterHeight = 73;
+
+      function classifyRatio(image) {
+        const ratio = image.naturalWidth / image.naturalHeight;
+        // Facebook-style handling for the two requested creative formats.
+        if (Math.abs(ratio - 0.8) < 0.08) {
+          return '4:5';
+        }
+        return '1:1';
+      }
+
+      function applyCreativeRatio(image) {
+        const card = image.closest('.product-card');
+        const ratio = classifyRatio(image);
+        card.dataset.ratio = ratio;
+
+        const cardWidth = card.getBoundingClientRect().width || 294;
+        const mediaHeight = ratio === '4:5' ? cardWidth * 1.25 : cardWidth;
+        card.style.setProperty('--card-media-height', `${mediaHeight}px`);
+      }
+
+      function refreshDynamicFrame() {
+        const images = [...track.querySelectorAll('.ad-creative')];
+
+        images.forEach((image) => {
+          if (image.complete && image.naturalWidth) {
+            applyCreativeRatio(image);
+          }
+        });
+
+        const visibleCards = [...track.querySelectorAll('.product-card')];
+        const tallestMedia = Math.max(
+          ...visibleCards.map((card) => {
+            const image = card.querySelector('.ad-creative');
+            if (!image || !image.naturalWidth) return 294;
+            return classifyRatio(image) === '4:5' ? 367.5 : 294;
+          }),
+        );
+
+        const carouselHeight = tallestMedia + mediaFooterHeight;
+        ad.style.setProperty('--media-height', `${tallestMedia}px`);
+        ad.style.setProperty('--carousel-height', `${carouselHeight}px`);
+
+        visibleCards.forEach((card) => {
+          const image = card.querySelector('.ad-creative');
+          const mediaHeight =
+            image && image.naturalWidth && classifyRatio(image) === '4:5'
+              ? 367.5
+              : 294;
+          card.style.height = `${mediaHeight + mediaFooterHeight}px`;
+        });
+
+        updateCarousel();
+        fit();
+      }
+
+      track.querySelectorAll('.ad-creative').forEach((image) => {
+        image.addEventListener('load', refreshDynamicFrame);
+        if (image.complete && image.naturalWidth) {
+          applyCreativeRatio(image);
+        }
+      });
+
+      document
+        .querySelector('.close')
+        .addEventListener('click', () => (ad.hidden = true));
+      function fit() {
+        if (window.innerWidth >= 707) {
+          ad.style.transform = '';
+          document.querySelector('.canvas').style.height = '';
+          return;
+        }
+        const scale = window.innerWidth / 682;
+        ad.style.transform = `scale(${scale})`;
+        document.querySelector('.canvas').style.height =
+          `${ad.scrollHeight * scale}px`;
+      }
+      window.addEventListener('resize', () => {
+        fit();
+        updateCarousel();
+      });
+      refreshDynamicFrame();
+
+      const fbmTrack = document.getElementById('fbmTrack');
+      const fbmPrev = document.getElementById('fbmPrev');
+      const fbmNext = document.getElementById('fbmNext');
+      const fbmViewport = document.querySelector('.fbm-carousel-viewport');
+      let fbmIndex = 0;
+      let fbmStep = 234;
+
+      function updateFacebookMobileCarousel() {
+        const cards = [...fbmTrack.querySelectorAll('.fbm-card')];
+        const card = cards[0];
+        const cardWidth = card ? card.getBoundingClientRect().width : 230;
+        const gap = 4;
+        fbmStep = cardWidth + gap;
+
+        const viewportStyle = getComputedStyle(fbmViewport);
+        const paddingLeft = parseFloat(viewportStyle.paddingLeft) || 0;
+        const paddingRight = parseFloat(viewportStyle.paddingRight) || 0;
+        const usableWidth =
+          fbmViewport.clientWidth - paddingLeft - paddingRight;
+        const centerOffset = Math.max(0, (usableWidth - cardWidth) / 2);
+
+        // Use the inner content width (without viewport padding) so the last card
+        // ends with the same outer right-side gap that the first card has on the left.
+        const maxShift = Math.max(0, fbmTrack.scrollWidth - usableWidth);
+        const maxIndex = Math.max(0, cards.length - 1);
+        fbmIndex = Math.max(0, Math.min(fbmIndex, maxIndex));
+
+        const requested =
+          fbmIndex === 0 ? 0 : Math.max(0, fbmIndex * fbmStep - centerOffset);
+
+        const shift = Math.min(requested, maxShift);
+        fbmTrack.style.transform = `translateX(-${shift}px)`;
+        fbmPrev.hidden = fbmIndex === 0;
+        fbmNext.hidden = fbmIndex === maxIndex;
+        fbmPrev.setAttribute('aria-disabled', String(fbmIndex === 0));
+        fbmNext.setAttribute('aria-disabled', String(fbmIndex === maxIndex));
+      }
+      fbmNext.addEventListener('click', () => {
+        fbmIndex += 1;
+        updateFacebookMobileCarousel();
+      });
+
+      fbmPrev.addEventListener('click', () => {
+        fbmIndex -= 1;
+        updateFacebookMobileCarousel();
+      });
+
+      function applyFacebookMobileCreativeRatio(img) {
+        if (!img.naturalWidth || !img.naturalHeight) return;
+
+        const ratio = img.naturalWidth / img.naturalHeight;
+        const isPortrait = ratio < 0.9;
+        const cardWidth = 230;
+        const imageHeight = isPortrait
+          ? Math.round((cardWidth * 5) / 4)
+          : cardWidth;
+
+        const mobileAd = document.getElementById('facebookMobileAd');
+        mobileAd.style.setProperty('--fbm-card-width', `${cardWidth}px`);
+        mobileAd.style.setProperty('--fbm-image-height', `${imageHeight}px`);
+        mobileAd.dataset.creativeRatio = isPortrait ? '4:5' : '1:1';
+
+        requestAnimationFrame(updateFacebookMobileCarousel);
+      }
+
+      function detectFacebookMobileCreativeSize() {
+        document.querySelectorAll('.fbm-image').forEach((img) => {
+          if (img.complete && img.naturalWidth) {
+            applyFacebookMobileCreativeRatio(img);
+          } else {
+            img.addEventListener(
+              'load',
+              () => applyFacebookMobileCreativeRatio(img),
+              { once: true },
+            );
+          }
+        });
+      }
+
+      document.querySelectorAll('.fbm-image').forEach((img) => {
+        if (img.complete) {
+          applyFacebookMobileCreativeRatio(img);
+        } else {
+          img.addEventListener(
+            'load',
+            () => applyFacebookMobileCreativeRatio(img),
+            { once: true },
+          );
+        }
+      });
+      updateFacebookMobileCarousel();
+
+      const igmTrack = document.getElementById('igmTrack');
+      const igmPrev = document.getElementById('igmPrev');
+      const igmNext = document.getElementById('igmNext');
+      const igmDotsTrack = document.getElementById('igmDotsTrack');
+
+      let igmIndex = 0;
+      const igmStep = 320;
+
+      function buildInstagramDots() {
+        const totalSlides = igmTrack.querySelectorAll('.igm-slide').length;
+        igmDotsTrack.replaceChildren();
+
+        for (let index = 0; index < totalSlides; index++) {
+          const dot = document.createElement('span');
+          dot.className = 'igm-dot';
+          dot.setAttribute('aria-hidden', 'true');
+          igmDotsTrack.appendChild(dot);
+        }
+      }
+
+      function applyInstagramCreativeRatio(img) {
+        if (!img.naturalWidth || !img.naturalHeight) return;
+
+        const cardWidth = 320;
+        const ratio = img.naturalWidth / img.naturalHeight;
+
+        let imageHeight;
+        if (ratio < 0.9) {
+          // Portrait creative like 4:5
+          imageHeight = Math.round((cardWidth * 5) / 4);
+        } else if (ratio > 1.02) {
+          // Landscape or wide creative: keep full width and reduce height accordingly.
+          imageHeight = Math.round(cardWidth / ratio);
+        } else {
+          // Square / near-square
+          imageHeight = cardWidth;
+        }
+
+        const igAd = document.getElementById('instagramMobileAd');
+        igAd.style.setProperty('--igm-image-height', `${imageHeight}px`);
+        igAd.dataset.creativeRatio =
+          ratio < 0.9 ? '4:5' : ratio > 1.02 ? 'landscape' : '1:1';
+
+        requestAnimationFrame(updateInstagramCarousel);
+      }
+
+      function detectInstagramCreativeSize() {
+        document.querySelectorAll('.igm-image').forEach((img) => {
+          if (img.complete && img.naturalWidth) {
+            applyInstagramCreativeRatio(img);
+          } else {
+            img.addEventListener(
+              'load',
+              () => applyInstagramCreativeRatio(img),
+              { once: true },
+            );
+          }
+        });
+      }
+
+      function updateInstagramDots() {
+        const dots = [...igmDotsTrack.querySelectorAll('.igm-dot')];
+
+        dots.forEach((dot, index) => {
+          dot.classList.toggle('is-active', index === igmIndex);
+        });
+
+        // Keep a three-dot window visible and move that window across all slides.
+        const dotStep = 10; // 6px dot + 4px gap
+        const visibleDots = 3;
+        const firstVisible = Math.max(
+          0,
+          Math.min(igmIndex - 1, Math.max(0, dots.length - visibleDots)),
+        );
+
+        igmDotsTrack.style.transform = `translateX(-${firstVisible * dotStep}px)`;
+      }
+
+      function updateInstagramCarousel() {
+        const totalSlides = igmTrack.querySelectorAll('.igm-slide').length;
+        const maxIndex = Math.max(0, totalSlides - 1);
+
+        igmIndex = Math.max(0, Math.min(igmIndex, maxIndex));
+        igmTrack.style.transform = `translateX(-${igmIndex * igmStep}px)`;
+
+        igmPrev.hidden = igmIndex === 0;
+        igmNext.hidden = igmIndex === maxIndex;
+
+        updateInstagramDots();
+      }
+
+      igmNext.addEventListener('click', () => {
+        igmIndex += 1;
+        updateInstagramCarousel();
+      });
+
+      igmPrev.addEventListener('click', () => {
+        igmIndex -= 1;
+        updateInstagramCarousel();
+      });
+
+      buildInstagramDots();
+      updateInstagramCarousel();
+    </script>
+
+    <script id="creative-source-guide" type="application/json">
+      {
+        "how_to_replace": "Replace each ad-creative src attribute with your own image URL. Current demo source: https://b2.myadfinder.com/posts/1462782052555333/imageUrl.jpeg",
+        "supported_formats": ["1:1", "4:5"]
+      }
+    </script>
+
+    <script>
+      (() => {
+        const CSV_URL =
+          'https://docs.google.com/spreadsheets/d/e/2PACX-1vQWy_Q9tVr-BCfl1RtZe7qb-oQkNIDJhzgWbtqFWrjP3RhjyU1OIz0sM4kNkKmPM0SqC6awYFZJeGTF/pub?output=csv';
+        const advertiserSelect = document.getElementById('advertiserSelect');
+        const advertiserSelectWrap = document.querySelector(
+          '.advertiser-select-wrap',
+        );
+        const advertiserNav = document.getElementById('advertiserNav');
+        const previousAdvertiser =
+          document.getElementById('previousAdvertiser');
+        const nextAdvertiser = document.getElementById('nextAdvertiser');
+        const verifiedToggle = document.getElementById('verifiedToggle');
+        const csvStatus = document.getElementById('csvStatus');
+
+        let csvGroups = new Map();
+        const COPY_LIMIT = 69;
+        const DESKTOP_COPY_LIMIT = 118;
+        let desktopCopyState = { fullText: '', expanded: false };
+        let facebookMobileCopyState = { fullText: '', expanded: false };
+        let instagramCopyState = { fullText: '', expanded: false };
+
+        function truncateToLimit(text, limit = COPY_LIMIT) {
+          const cleanText = String(text ?? '').trim();
+          if (cleanText.length <= limit) {
+            return { text: cleanText, truncated: false };
+          }
+
+          let truncated = cleanText.slice(0, limit).trimEnd();
+          const lastSpace = truncated.lastIndexOf(' ');
+          if (lastSpace > limit * 0.6) {
+            truncated = truncated.slice(0, lastSpace).trimEnd();
+          }
+
+          return { text: truncated + '…', truncated: true };
+        }
+
+        function renderDesktopCopy(text, expanded = false) {
+          const line = document.querySelector('#facebookAd .copy-line');
+          const textNode = document.querySelector(
+            '#facebookAd .copy-line-text',
+          );
+          const button = document.querySelector('#facebookAd .see-more');
+          if (!line || !textNode || !button) return;
+
+          const fullText = String(text ?? '').trim();
+          const limited = truncateToLimit(fullText, DESKTOP_COPY_LIMIT);
+
+          line.classList.toggle('is-expanded', expanded && limited.truncated);
+
+          if (expanded || !limited.truncated) {
+            textNode.textContent = limited.truncated
+              ? `${fullText} `
+              : fullText;
+            button.hidden = !limited.truncated;
+            button.textContent = 'See less';
+          } else {
+            textNode.textContent = `${limited.text} `;
+            button.hidden = false;
+            button.textContent = 'See more';
+          }
+
+          if (!fullText) {
+            textNode.textContent = '';
+            button.hidden = true;
+          }
+
+          desktopCopyState = {
+            fullText,
+            expanded: expanded && limited.truncated,
+          };
+        }
+
+        function renderFacebookMobileCopy(text, expanded = false) {
+          const message = document.querySelector(
+            '#facebookMobileAd .fbm-message',
+          );
+          const button = document.getElementById('fbmSeeMore');
+          if (!message || !button) return;
+
+          const fullText = String(text ?? '').trim();
+          const limited = truncateToLimit(fullText);
+
+          if (expanded || !limited.truncated) {
+            message.textContent = fullText;
+            button.hidden = !limited.truncated;
+            button.textContent = 'See less';
+          } else {
+            message.textContent = limited.text;
+            button.hidden = false;
+            button.textContent = 'See more';
+          }
+
+          facebookMobileCopyState = {
+            fullText,
+            expanded: expanded && limited.truncated,
+          };
+        }
+
+        function renderInstagramCopy(text, expanded = false) {
+          const caption = document.querySelector(
+            '#instagramMobileAd .igm-caption-text',
+          );
+          const button = document.getElementById('igmSeeMore');
+          if (!caption || !button) return;
+
+          const fullText = String(text ?? '').trim();
+          const limited = truncateToLimit(fullText);
+
+          if (expanded || !limited.truncated) {
+            caption.textContent = fullText;
+            button.hidden = !limited.truncated;
+            button.textContent = 'See less';
+          } else {
+            caption.textContent = limited.text;
+            button.hidden = false;
+            button.textContent = 'See more';
+          }
+
+          instagramCopyState = {
+            fullText,
+            expanded: expanded && limited.truncated,
+          };
+        }
+
+        document
+          .querySelector('#facebookAd .see-more')
+          ?.addEventListener('click', () => {
+            renderDesktopCopy(
+              desktopCopyState.fullText,
+              !desktopCopyState.expanded,
+            );
+          });
+
+        document.getElementById('fbmSeeMore')?.addEventListener('click', () => {
+          renderFacebookMobileCopy(
+            facebookMobileCopyState.fullText,
+            !facebookMobileCopyState.expanded,
+          );
+        });
+
+        document.getElementById('igmSeeMore')?.addEventListener('click', () => {
+          renderInstagramCopy(
+            instagramCopyState.fullText,
+            !instagramCopyState.expanded,
+          );
+        });
+
+        function parseCSV(text) {
+          const rows = [];
+          let row = [];
+          let cell = '';
+          let quoted = false;
+
+          for (let i = 0; i < text.length; i++) {
+            const char = text[i];
+
+            if (quoted) {
+              if (char === '"') {
+                if (text[i + 1] === '"') {
+                  cell += '"';
+                  i++;
+                } else {
+                  quoted = false;
+                }
+              } else {
+                cell += char;
+              }
+              continue;
+            }
+
+            if (char === '"') {
+              quoted = true;
+            } else if (char === ',') {
+              row.push(cell);
+              cell = '';
+            } else if (char === '\n') {
+              row.push(cell.replace(/\r$/, ''));
+              rows.push(row);
+              row = [];
+              cell = '';
+            } else {
+              cell += char;
+            }
+          }
+
+          if (cell.length || row.length) {
+            row.push(cell.replace(/\r$/, ''));
+            rows.push(row);
+          }
+
+          return rows;
+        }
+
+        function clean(value) {
+          return String(value ?? '').trim();
+        }
+
+        function escapeHTML(value) {
+          return clean(value)
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+        }
+
+        function normalizeRows(parsedRows) {
+          return parsedRows
+            .slice(1)
+            .map((columns, originalIndex) => ({
+              account: clean(columns[0]),
+              avatar: clean(columns[1]),
+              slide: clean(columns[2]),
+              image: clean(columns[3]),
+              footerText: clean(columns[4]),
+              subtext: clean(columns[5]),
+              cta: clean(columns[6]),
+              postText: clean(columns[7]),
+              originalIndex,
+            }))
+            .filter((row) => row.account && row.image);
+        }
+
+        function groupRows(rows) {
+          const groups = new Map();
+
+          for (const row of rows) {
+            if (!groups.has(row.account)) groups.set(row.account, []);
+            groups.get(row.account).push(row);
+          }
+
+          for (const group of groups.values()) {
+            group.sort((a, b) => {
+              const aNumber = Number.parseFloat(a.slide);
+              const bNumber = Number.parseFloat(b.slide);
+              const aValid = Number.isFinite(aNumber);
+              const bValid = Number.isFinite(bNumber);
+
+              if (aValid && bValid && aNumber !== bNumber)
+                return aNumber - bNumber;
+              if (aValid !== bValid) return aValid ? -1 : 1;
+              return a.originalIndex - b.originalIndex;
+            });
+          }
+
+          return groups;
+        }
+
+        function firstFilled(rows, key, fallback = '') {
+          return rows.find((row) => clean(row[key]))?.[key] || fallback;
+        }
+
+        function setAvatar(container, imageURL, accountName) {
+          if (!container) return;
+
+          if (imageURL) {
+            container.innerHTML = `<img src="${escapeHTML(imageURL)}" alt="${escapeHTML(accountName)}">`;
+          } else {
+            container.textContent = accountName.slice(0, 4).toUpperCase();
+          }
+        }
+
+        function updateIdentity(rows) {
+          const account = rows[0].account;
+          const avatar = firstFilled(rows, 'avatar');
+          const postText = firstFilled(rows, 'postText');
+
+          const desktopAvatar = document.querySelector('#facebookAd .avatar');
+          if (desktopAvatar) {
+            desktopAvatar.src = avatar || desktopAvatar.src;
+            desktopAvatar.alt = account;
+          }
+
+          renderVerifiedState(account);
+
+          renderDesktopCopy(postText, false);
+
+          setAvatar(
+            document.querySelector('#facebookMobileAd .fbm-avatar'),
+            avatar,
+            account,
+          );
+          renderFacebookMobileCopy(postText, false);
+
+          setAvatar(
+            document.querySelector('#instagramMobileAd .igm-avatar'),
+            avatar,
+            account,
+          );
+          const instagramCaptionUser = document.querySelector(
+            '#instagramMobileAd .igm-caption-user',
+          );
+          if (instagramCaptionUser) instagramCaptionUser.textContent = account;
+          renderInstagramCopy(postText, false);
+        }
+
+        function renderDesktop(rows) {
+          const track = document.getElementById('carouselTrack');
+          track.innerHTML = rows
+            .map(
+              (row, index) => `
+      <article class="product-card">
+        <img class="ad-creative" src="${escapeHTML(row.image)}" alt="Advertisement creative ${index + 1}">
+        <div class="product-footer">
+          <div class="footer-copy-wrap${row.subtext ? ' has-subtext' : ''}">
+            <div class="footer-copy">${escapeHTML(row.footerText)}</div>
+            ${row.subtext ? `<div class="footer-subtext">${escapeHTML(row.subtext)}</div>` : ''}
+          </div>
+          <button class="shop-button" type="button">${escapeHTML(row.cta || 'Shop now')}</button>
+        </div>
+      </article>
+    `,
+            )
+            .join('');
+        }
+
+        function renderFacebookMobile(rows) {
+          const track = document.getElementById('fbmTrack');
+          track.innerHTML = rows
+            .map(
+              (row, index) => `
+      <article class="fbm-card">
+        <img class="fbm-image" src="${escapeHTML(row.image)}" alt="Ad creative ${index + 1}">
+        <div class="fbm-card-footer">
+          <div class="fbm-copy-wrap${row.subtext ? ' has-subtext' : ''}">
+            <div class="fbm-headline">${escapeHTML(row.footerText)}</div>
+            ${row.subtext ? `<div class="fbm-subtext">${escapeHTML(row.subtext)}</div>` : ''}
+          </div>
+          <button type="button">${escapeHTML(row.cta || 'Shop now')}</button>
+        </div>
+      </article>
+    `,
+            )
+            .join('');
+        }
+
+        function renderInstagram(rows) {
+          const track = document.getElementById('igmTrack');
+          track.innerHTML = rows
+            .map(
+              (row, index) => `
+      <article class="igm-slide">
+        <img class="igm-image" src="${escapeHTML(row.image)}" alt="Instagram ad creative ${index + 1}">
+      </article>
+    `,
+            )
+            .join('');
+
+          const cta = firstFilled(rows, 'cta', 'Shop now');
+          const shopLabel = document.querySelector(
+            '.igm-shop-frame-button span:first-child',
+          );
+          if (shopLabel) shopLabel.textContent = cta;
+        }
+
+        function resetAndRefreshCarousels() {
+          currentIndex = 0;
+          fbmIndex = 0;
+          igmIndex = 0;
+
+          requestAnimationFrame(() => {
+            refreshDynamicFrame();
+            updateCarousel();
+            detectFacebookMobileCreativeSize();
+            updateFacebookMobileCarousel();
+            detectInstagramCreativeSize();
+            buildInstagramDots();
+            updateInstagramCarousel();
+            fit();
+          });
+        }
+
+        const FACEBOOK_VERIFIED_BADGE_URL =
+          'https://static.xx.fbcdn.net/assets/?set=content_operations_help_center&name=fb-verifiedbadge-iphone&density=1';
+        const INSTAGRAM_VERIFIED_BADGE_URL =
+          'https://static.xx.fbcdn.net/assets/?set=content_operations_help_center&name=ig-verifiedbadge-shared&density=1';
+
+        function verifiedBadgeMarkup(className, source) {
+          return `<img class="${className}" src="${source}" alt="" aria-hidden="true" draggable="false" />`;
+        }
+
+        function renderVerifiedState(account) {
+          const isVerified = !!verifiedToggle?.checked;
+          const safeAccount = escapeHTML(account || '');
+
+          const desktopName = document.querySelector('#facebookAd .page-name');
+          if (desktopName) {
+            desktopName.innerHTML = isVerified
+              ? `${safeAccount} ${verifiedBadgeMarkup('verified', FACEBOOK_VERIFIED_BADGE_URL)}`
+              : safeAccount;
+          }
+
+          const mobileName = document.querySelector(
+            '#facebookMobileAd .fbm-page-name',
+          );
+          if (mobileName) {
+            mobileName.innerHTML = isVerified
+              ? `${safeAccount} ${verifiedBadgeMarkup('fbm-verified', FACEBOOK_VERIFIED_BADGE_URL)}`
+              : safeAccount;
+          }
+
+          const instagramName = document.querySelector(
+            '#instagramMobileAd .igm-username',
+          );
+          if (instagramName) {
+            instagramName.innerHTML = isVerified
+              ? `${safeAccount} ${verifiedBadgeMarkup('igm-verified', INSTAGRAM_VERIFIED_BADGE_URL)}`
+              : safeAccount;
+          }
+        }
+
+        function updateAdvertiserNavigation() {
+          const optionCount = advertiserSelect.options.length;
+          const currentIndex = advertiserSelect.selectedIndex;
+
+          advertiserNav.hidden = optionCount <= 1;
+          previousAdvertiser.disabled = optionCount <= 1 || currentIndex <= 0;
+          nextAdvertiser.disabled =
+            optionCount <= 1 || currentIndex >= optionCount - 1;
+        }
+
+        function changeAdvertiserByOffset(offset) {
+          const optionCount = advertiserSelect.options.length;
+          if (!optionCount) return;
+
+          const nextIndex = Math.max(
+            0,
+            Math.min(advertiserSelect.selectedIndex + offset, optionCount - 1),
+          );
+
+          if (nextIndex === advertiserSelect.selectedIndex) return;
+
+          advertiserSelect.selectedIndex = nextIndex;
+          advertiserSelect.dispatchEvent(
+            new Event('change', { bubbles: true }),
+          );
+          window.refreshCustomSelects?.();
+          updateAdvertiserNavigation();
+        }
+
+        previousAdvertiser.addEventListener('click', () => {
+          changeAdvertiserByOffset(-1);
+        });
+
+        nextAdvertiser.addEventListener('click', () => {
+          changeAdvertiserByOffset(1);
+        });
+
+        verifiedToggle?.addEventListener('change', () => {
+          const currentAccount =
+            advertiserSelect.value ||
+            advertiserSelect.options[advertiserSelect.selectedIndex]?.value;
+          if (currentAccount) {
+            renderVerifiedState(currentAccount);
+          }
+        });
+
+        function renderAdvertiser(account) {
+          const rows = csvGroups.get(account);
+          if (!rows?.length) return;
+
+          updateIdentity(rows);
+          renderDesktop(rows);
+          renderFacebookMobile(rows);
+          renderInstagram(rows);
+          resetAndRefreshCarousels();
+
+          csvStatus.textContent = `${rows.length} slide${rows.length === 1 ? '' : 's'} loaded`;
+          csvStatus.classList.remove('is-error');
+          updateAdvertiserNavigation();
+        }
+
+        function populateAdvertisers() {
+          advertiserSelect.innerHTML = [...csvGroups.keys()]
+            .map(
+              (account) =>
+                `<option value="${escapeHTML(account)}">${escapeHTML(account)}</option>`,
+            )
+            .join('');
+
+          advertiserSelectWrap.hidden = csvGroups.size <= 1;
+          advertiserNav.hidden = csvGroups.size <= 1;
+          window.refreshCustomSelects?.();
+          updateAdvertiserNavigation();
+          const firstAccount = csvGroups.keys().next().value;
+          if (firstAccount) renderAdvertiser(firstAccount);
+        }
+
+        advertiserSelect.addEventListener('change', (event) => {
+          renderAdvertiser(event.target.value);
+        });
+
+        async function loadCSV() {
+          try {
+            csvStatus.textContent = 'Loading CSV…';
+            csvStatus.classList.remove('is-error');
+            exportProgressPanel.classList.remove(
+              'is-complete',
+              'is-error',
+              'is-idle',
+            );
+            updateExportProgress(
+              10,
+              'Loading CSV…',
+              'Fetching advertiser data.',
+            );
+
+            const response = await fetch(CSV_URL, { cache: 'no-store' });
+            if (!response.ok)
+              throw new Error(`CSV request failed (${response.status})`);
+
+            const text = await response.text();
+            const rows = normalizeRows(parseCSV(text));
+
+            if (!rows.length) {
+              throw new Error('No usable rows were found in Columns A–H.');
+            }
+
+            csvGroups = groupRows(rows);
+            populateAdvertisers();
+            setReadyStatus();
+          } catch (error) {
+            console.error(error);
+            csvStatus.textContent = 'CSV could not be loaded';
+            csvStatus.classList.add('is-error');
+            failExportProgress('CSV could not be loaded.');
+          }
+        }
+
+        loadCSV();
+      })();
+    </script>
+
+    <script>
+      (() => {
+        const subtitleMap = {
+          'facebook-desktop-feed': 'Desktop preview',
+          'facebook-mobile-feed': '320 × 438.08',
+          'instagram-mobile-feed': '320 × 518',
+        };
+
+        function escapeSelectText(value) {
+          return String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;');
+        }
+
+        function closeAllCustomSelects(except = null) {
+          document
+            .querySelectorAll('.custom-select-wrap.is-open')
+            .forEach((wrap) => {
+              if (wrap === except) return;
+              wrap.classList.remove('is-open');
+              wrap.querySelector('.custom-select-menu').hidden = true;
+              wrap
+                .querySelector('.custom-select-button')
+                .setAttribute('aria-expanded', 'false');
+            });
+        }
+
+        function refreshCustomSelect(wrap) {
+          const select = wrap.querySelector('select');
+          const menu = wrap.querySelector('.custom-select-menu');
+          const valueLabel = wrap.querySelector('.custom-select-value');
+          const options = [...select.options];
+
+          menu.innerHTML = options
+            .map((option) => {
+              const subtitle =
+                wrap.dataset.customSelect === 'frame'
+                  ? subtitleMap[option.value] || ''
+                  : 'Advertiser account';
+
+              return `
+        <button
+          class="custom-select-option${option.selected ? ' is-selected' : ''}"
+          type="button"
+          role="option"
+          aria-selected="${option.selected}"
+          data-value="${escapeSelectText(option.value)}"
+        >
+          <span class="custom-select-option-copy">
+            <span class="custom-select-option-title">${escapeSelectText(option.textContent)}</span>
+            <span class="custom-select-option-subtitle">${escapeSelectText(subtitle)}</span>
+          </span>
+          <span class="custom-select-selected-mark" aria-hidden="true">✓</span>
+        </button>
+      `;
+            })
+            .join('');
+
+          const selected = select.options[select.selectedIndex];
+          valueLabel.textContent = selected
+            ? selected.textContent
+            : 'Select advertiser';
+
+          menu
+            .querySelectorAll('.custom-select-option')
+            .forEach((optionButton) => {
+              optionButton.addEventListener('click', (event) => {
+                event.stopPropagation();
+                select.value = optionButton.dataset.value;
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+                refreshCustomSelect(wrap);
+                closeAllCustomSelects();
+                wrap.querySelector('.custom-select-button').focus();
+              });
+            });
+        }
+
+        function initializeCustomSelect(wrap) {
+          const button = wrap.querySelector('.custom-select-button');
+          const menu = wrap.querySelector('.custom-select-menu');
+
+          refreshCustomSelect(wrap);
+
+          button.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const shouldOpen = menu.hidden;
+            closeAllCustomSelects(wrap);
+            wrap.classList.toggle('is-open', shouldOpen);
+            menu.hidden = !shouldOpen;
+            button.setAttribute('aria-expanded', String(shouldOpen));
+          });
+
+          wrap
+            .querySelector('select')
+            .addEventListener('change', () => refreshCustomSelect(wrap));
+        }
+
+        document
+          .querySelectorAll('.custom-select-wrap')
+          .forEach(initializeCustomSelect);
+        document.addEventListener('click', () => closeAllCustomSelects());
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape') closeAllCustomSelects();
+        });
+
+        window.refreshCustomSelects = () => {
+          document
+            .querySelectorAll('.custom-select-wrap')
+            .forEach(refreshCustomSelect);
+        };
+      })();
+    </script>
+  </body>
+</html>
