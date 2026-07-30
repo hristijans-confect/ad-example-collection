@@ -2251,6 +2251,39 @@
         margin-left: 0;
         margin-right: 12px;
       }
+
+      /* Facebook Desktop Two-Image Feed */
+      .facebook-ad.two-image-desktop {
+        width: 620px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .facebook-ad.two-image-desktop .carousel-viewport,
+      .facebook-ad.two-image-desktop .carousel-viewport.is-scrolled,
+      .facebook-ad.two-image-desktop .carousel-viewport.is-end {
+        width: 592px;
+        margin-left: auto;
+        margin-right: auto;
+        overflow: hidden;
+      }
+      .facebook-ad.two-image-desktop .carousel-track {
+        gap: 4px;
+      }
+      .facebook-ad.two-image-desktop .product-card {
+        flex: 0 0 294px;
+      }
+      .facebook-ad.two-image-desktop .carousel-prev,
+      .facebook-ad.two-image-desktop .carousel-next {
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 20;
+      }
+      .facebook-ad.two-image-desktop .carousel-prev {
+        left: 12px;
+      }
+      .facebook-ad.two-image-desktop .carousel-next {
+        right: 12px;
+      }
     </style>
   </head>
   <body>
@@ -2268,6 +2301,9 @@
             >
               <option value="facebook-desktop-feed" selected>
                 Facebook Desktop Feed
+              </option>
+              <option value="facebook-desktop-two-image-feed">
+                Facebook Desktop Two-Image Feed
               </option>
               <option value="facebook-mobile-feed">Facebook Mobile Feed</option>
               <option value="instagram-mobile-feed">
@@ -3153,6 +3189,24 @@
                     <input
                       type="checkbox"
                       name="exportFrame"
+                      value="facebook-desktop-two-image-feed"
+                      checked
+                    />
+                    <span class="export-checkbox-ui" aria-hidden="true"></span>
+                    <span class="export-option-copy">
+                      <span class="export-option-title"
+                        >Facebook Desktop Two-Image Feed</span
+                      >
+                      <span class="export-option-size"
+                        >Two products side by side</span
+                      >
+                    </span>
+                  </label>
+
+                  <label class="export-frame-option">
+                    <input
+                      type="checkbox"
+                      name="exportFrame"
                       value="facebook-mobile-feed"
                       checked
                     />
@@ -3430,6 +3484,37 @@
       </section>
     </main>
     <script>
+      // Create the two-image desktop variant from the existing desktop frame so
+      // it stays visually identical. The only difference is the viewport is
+      // trimmed to show exactly two full cards instead of the peeking side cards.
+      (() => {
+        const sourcePanel = document.querySelector(
+          '.frame-panel[data-frame="facebook-desktop-feed"]',
+        );
+        if (!sourcePanel) return;
+
+        const twoImagePanel = sourcePanel.cloneNode(true);
+        twoImagePanel.dataset.frame = 'facebook-desktop-two-image-feed';
+        twoImagePanel.hidden = true;
+
+        const twoImageAd = twoImagePanel.querySelector('#facebookAd');
+        if (twoImageAd) {
+          twoImageAd.id = 'facebookAdTwo';
+          twoImageAd.classList.add('two-image-desktop');
+        }
+
+        const twoImageTrack = twoImagePanel.querySelector('#carouselTrack');
+        if (twoImageTrack) twoImageTrack.id = 'carouselTrackTwo';
+
+        const twoImagePrev = twoImagePanel.querySelector('#carouselPrev');
+        if (twoImagePrev) twoImagePrev.id = 'carouselPrevTwo';
+
+        const twoImageNext = twoImagePanel.querySelector('#carouselNext');
+        if (twoImageNext) twoImageNext.id = 'carouselNextTwo';
+
+        sourcePanel.insertAdjacentElement('afterend', twoImagePanel);
+      })();
+
       const ad = document.getElementById('facebookAd');
       const frameSelect = document.getElementById('frameSelect');
       const exportFrames = document.getElementById('exportFrames');
@@ -3489,6 +3574,14 @@
           requestAnimationFrame(() => {
             refreshDynamicFrame();
             updateCarousel();
+            fit();
+          });
+        }
+
+        if (frameValue === 'facebook-desktop-two-image-feed') {
+          requestAnimationFrame(() => {
+            refreshTwoImageDynamicFrame();
+            updateTwoImageCarousel();
             fit();
           });
         }
@@ -3638,6 +3731,8 @@
       function getFrameElement(frameValue) {
         if (frameValue === 'facebook-desktop-feed')
           return document.getElementById('facebookAd');
+        if (frameValue === 'facebook-desktop-two-image-feed')
+          return document.getElementById('facebookAdTwo');
         if (frameValue === 'facebook-mobile-feed')
           return document.getElementById('facebookMobileAd');
         if (frameValue === 'instagram-mobile-feed')
@@ -3659,6 +3754,8 @@
 
       function getFrameMaxIndex(frameValue) {
         if (frameValue === 'facebook-desktop-feed') return getMaxIndex();
+        if (frameValue === 'facebook-desktop-two-image-feed')
+          return getTwoImageMaxIndex();
         if (frameValue === 'facebook-mobile-feed')
           return getFacebookMobileMaxIndex();
         if (frameValue === 'instagram-mobile-feed')
@@ -3671,6 +3768,10 @@
           currentIndex = index;
           refreshDynamicFrame();
           updateCarousel();
+          fit();
+        } else if (frameValue === 'facebook-desktop-two-image-feed') {
+          twoImageIndex = index;
+          updateTwoImageCarousel();
           fit();
         } else if (frameValue === 'facebook-mobile-feed') {
           fbmIndex = index;
@@ -3689,6 +3790,8 @@
         return (
           {
             'facebook-desktop-feed': 'facebook-desktop-feed',
+            'facebook-desktop-two-image-feed':
+              'facebook-desktop-two-image-feed',
             'facebook-mobile-feed': 'facebook-mobile-feed',
             'instagram-mobile-feed': 'instagram-mobile-feed',
           }[frameValue] || frameValue
@@ -4397,6 +4500,8 @@
             refreshDynamicFrame();
             updateCarousel();
             fit();
+          } else if (previousFrame === 'facebook-desktop-two-image-feed') {
+            fit();
           } else if (previousFrame === 'facebook-mobile-feed') {
             detectFacebookMobileCreativeSize();
             updateFacebookMobileCarousel();
@@ -4617,6 +4722,89 @@ Demo Brand,https://example.com/advertiser-image.jpg,2,https://example.com/ad-ima
       const cardStep = 298;
       let currentIndex = 0;
 
+      const twoImageTrack = document.getElementById('carouselTrackTwo');
+      const twoImageNext = document.getElementById('carouselNextTwo');
+      const twoImagePrev = document.getElementById('carouselPrevTwo');
+      const twoImageViewport = document.querySelector(
+        '#facebookAdTwo .carousel-viewport',
+      );
+      const twoImageCardStep = 298;
+      let twoImageIndex = 0;
+
+      function getTwoImageMaxIndex() {
+        if (!twoImageTrack) return 0;
+        const cardCount =
+          twoImageTrack.querySelectorAll('.product-card').length;
+        return Math.max(0, cardCount - 2);
+      }
+
+      function updateTwoImageCarousel() {
+        if (!twoImageTrack || !twoImageViewport) return;
+
+        const maxIndex = getTwoImageMaxIndex();
+        twoImageIndex = Math.max(0, Math.min(twoImageIndex, maxIndex));
+
+        const maxShift = Math.max(
+          0,
+          twoImageTrack.scrollWidth - twoImageViewport.clientWidth,
+        );
+        const requestedShift = twoImageIndex * twoImageCardStep;
+        const actualShift = Math.min(requestedShift, maxShift);
+        twoImageTrack.style.transform = `translateX(-${actualShift}px)`;
+
+        if (twoImagePrev) {
+          twoImagePrev.hidden = twoImageIndex === 0;
+          twoImagePrev.setAttribute(
+            'aria-disabled',
+            String(twoImageIndex === 0),
+          );
+        }
+
+        if (twoImageNext) {
+          const isAtEnd = twoImageIndex >= maxIndex;
+          twoImageNext.hidden = isAtEnd;
+          twoImageNext.setAttribute('aria-disabled', String(isAtEnd));
+        }
+      }
+
+      twoImageNext?.addEventListener('click', () => {
+        if (twoImageIndex < getTwoImageMaxIndex()) {
+          twoImageIndex += 1;
+          updateTwoImageCarousel();
+        }
+      });
+
+      twoImagePrev?.addEventListener('click', () => {
+        if (twoImageIndex > 0) {
+          twoImageIndex -= 1;
+          updateTwoImageCarousel();
+        }
+      });
+
+      let twoImageTouchStartX = 0;
+      twoImageTrack?.addEventListener(
+        'touchstart',
+        (event) => {
+          twoImageTouchStartX = event.touches[0].clientX;
+        },
+        { passive: true },
+      );
+      twoImageTrack?.addEventListener(
+        'touchend',
+        (event) => {
+          const distance =
+            twoImageTouchStartX - event.changedTouches[0].clientX;
+          if (Math.abs(distance) < 35) return;
+          if (distance > 0 && twoImageIndex < getTwoImageMaxIndex()) {
+            twoImageIndex += 1;
+          } else if (distance < 0 && twoImageIndex > 0) {
+            twoImageIndex -= 1;
+          }
+          updateTwoImageCarousel();
+        },
+        { passive: true },
+      );
+
       function getMaxIndex() {
         const maxShift = Math.max(0, track.scrollWidth - viewport.clientWidth);
         return Math.ceil(maxShift / cardStep);
@@ -4752,6 +4940,47 @@ Demo Brand,https://example.com/advertiser-image.jpg,2,https://example.com/ad-ima
         });
 
         updateCarousel();
+        fit();
+      }
+
+      function refreshTwoImageDynamicFrame() {
+        const twoImageAd = document.getElementById('facebookAdTwo');
+        if (!twoImageAd || !twoImageTrack) return;
+
+        const images = [...twoImageTrack.querySelectorAll('.ad-creative')];
+        images.forEach((image) => {
+          if (image.complete && image.naturalWidth) {
+            applyCreativeRatio(image);
+          }
+        });
+
+        const cards = [...twoImageTrack.querySelectorAll('.product-card')];
+        const tallestMedia = Math.max(
+          294,
+          ...cards.map((card) => {
+            const image = card.querySelector('.ad-creative');
+            if (!image || !image.naturalWidth) return 294;
+            return classifyRatio(image) === '4:5' ? 367.5 : 294;
+          }),
+        );
+
+        const carouselHeight = tallestMedia + mediaFooterHeight;
+        twoImageAd.style.setProperty('--media-height', `${tallestMedia}px`);
+        twoImageAd.style.setProperty(
+          '--carousel-height',
+          `${carouselHeight}px`,
+        );
+
+        cards.forEach((card) => {
+          const image = card.querySelector('.ad-creative');
+          const mediaHeight =
+            image && image.naturalWidth && classifyRatio(image) === '4:5'
+              ? 367.5
+              : 294;
+          card.style.height = `${mediaHeight + mediaFooterHeight}px`;
+        });
+
+        updateTwoImageCarousel();
         fit();
       }
 
@@ -5260,9 +5489,24 @@ Demo Brand,https://example.com/advertiser-image.jpg,2,https://example.com/ad-ima
             desktopAvatar.alt = account;
           }
 
+          const twoImageDesktopAvatar = document.querySelector(
+            '#facebookAdTwo .avatar',
+          );
+          if (twoImageDesktopAvatar) {
+            twoImageDesktopAvatar.src = avatar || twoImageDesktopAvatar.src;
+            twoImageDesktopAvatar.alt = account;
+          }
+
           renderVerifiedState(account);
 
           renderDesktopCopy(postText, false);
+          const desktopCopy = document.querySelector('#facebookAd .post-copy');
+          const twoImageDesktopCopy = document.querySelector(
+            '#facebookAdTwo .post-copy',
+          );
+          if (desktopCopy && twoImageDesktopCopy) {
+            twoImageDesktopCopy.innerHTML = desktopCopy.innerHTML;
+          }
 
           setAvatar(
             document.querySelector('#facebookMobileAd .fbm-avatar'),
@@ -5301,6 +5545,38 @@ Demo Brand,https://example.com/advertiser-image.jpg,2,https://example.com/ad-ima
     `,
             )
             .join('');
+        }
+
+        function renderDesktopTwoImage(rows) {
+          const track = document.getElementById('carouselTrackTwo');
+          if (!track) return;
+
+          track.innerHTML = rows
+            .map(
+              (row, index) => `
+      <article class="product-card">
+        <img class="ad-creative" src="${escapeHTML(row.image)}" alt="Advertisement creative ${index + 1}">
+        <div class="product-footer">
+          <div class="footer-copy-wrap${row.subtext ? ' has-subtext' : ''}">
+            <div class="footer-copy">${escapeHTML(row.footerText)}</div>
+            ${row.subtext ? `<div class="footer-subtext">${escapeHTML(row.subtext)}</div>` : ''}
+          </div>
+          <button class="shop-button" type="button">${escapeHTML(row.cta || 'Shop now')}</button>
+        </div>
+      </article>
+    `,
+            )
+            .join('');
+
+          twoImageIndex = 0;
+
+          track.querySelectorAll('.ad-creative').forEach((image) => {
+            image.addEventListener('load', refreshTwoImageDynamicFrame, {
+              once: true,
+            });
+          });
+
+          requestAnimationFrame(refreshTwoImageDynamicFrame);
         }
 
         function renderFacebookMobile(rows) {
@@ -5344,12 +5620,15 @@ Demo Brand,https://example.com/advertiser-image.jpg,2,https://example.com/ad-ima
 
         function resetAndRefreshCarousels() {
           currentIndex = 0;
+          twoImageIndex = 0;
           fbmIndex = 0;
           igmIndex = 0;
 
           requestAnimationFrame(() => {
             refreshDynamicFrame();
             updateCarousel();
+            refreshTwoImageDynamicFrame();
+            updateTwoImageCarousel();
             detectFacebookMobileCreativeSize();
             updateFacebookMobileCarousel();
             detectInstagramCreativeSize();
@@ -5375,6 +5654,15 @@ Demo Brand,https://example.com/advertiser-image.jpg,2,https://example.com/ad-ima
           const desktopName = document.querySelector('#facebookAd .page-name');
           if (desktopName) {
             desktopName.innerHTML = isVerified
+              ? `${safeAccount} ${verifiedBadgeMarkup('verified', FACEBOOK_VERIFIED_BADGE_URL)}`
+              : safeAccount;
+          }
+
+          const twoImageDesktopName = document.querySelector(
+            '#facebookAdTwo .page-name',
+          );
+          if (twoImageDesktopName) {
+            twoImageDesktopName.innerHTML = isVerified
               ? `${safeAccount} ${verifiedBadgeMarkup('verified', FACEBOOK_VERIFIED_BADGE_URL)}`
               : safeAccount;
           }
@@ -5450,6 +5738,7 @@ Demo Brand,https://example.com/advertiser-image.jpg,2,https://example.com/ad-ima
 
           updateIdentity(rows);
           renderDesktop(rows);
+          renderDesktopTwoImage(rows);
           renderFacebookMobile(rows);
           renderInstagram(rows);
           resetAndRefreshCarousels();
@@ -5541,6 +5830,7 @@ Demo Brand,https://example.com/advertiser-image.jpg,2,https://example.com/ad-ima
       (() => {
         const subtitleMap = {
           'facebook-desktop-feed': 'Desktop preview',
+          'facebook-desktop-two-image-feed': 'Two products side by side',
           'facebook-mobile-feed': '320 × 438.08',
           'instagram-mobile-feed': '320 × 518',
         };
